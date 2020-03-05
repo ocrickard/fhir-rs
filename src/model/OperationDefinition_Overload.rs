@@ -2,25 +2,57 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A formal computable definition of an operation (on the RESTful interface) or a
 /// named query (using the search interaction).
 
 #[derive(Debug)]
 pub struct OperationDefinition_Overload<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl OperationDefinition_Overload<'_> {
+    pub fn new(value: &Value) -> OperationDefinition_Overload {
+        OperationDefinition_Overload {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for comment
+    pub fn _comment(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_comment") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
     /// Extensions for parameterName
     pub fn _parameter_name(&self) -> Option<Vec<Element>> {
         if let Some(Value::Array(val)) = self.value.get("_parameterName") {
             return Some(
                 val.into_iter()
-                    .map(|e| Element { value: e })
+                    .map(|e| Element {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Comments to go on overload.
+    pub fn comment(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("comment") {
+            return Some(string);
         }
         return None;
     }
@@ -34,9 +66,20 @@ impl OperationDefinition_Overload<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -56,7 +99,9 @@ impl OperationDefinition_Overload<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -75,55 +120,104 @@ impl OperationDefinition_Overload<'_> {
         return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for comment
-    pub fn _comment(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_comment") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Comments to go on overload.
-    pub fn comment(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("comment") {
-            return Some(string);
-        }
-        return None;
-    }
-
     pub fn validate(&self) -> bool {
+        if let Some(_val) = self._comment() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         if let Some(_val) = self._parameter_name() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.comment() {}
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.parameter_name() {
             _val.into_iter().for_each(|_e| {});
         }
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self._comment() {
-            _val.validate();
-        }
-        if let Some(_val) = self.comment() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct OperationDefinition_OverloadBuilder {
+    pub(crate) value: Value,
+}
+
+impl OperationDefinition_OverloadBuilder {
+    pub fn build(&self) -> OperationDefinition_Overload {
+        OperationDefinition_Overload {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: OperationDefinition_Overload) -> OperationDefinition_OverloadBuilder {
+        OperationDefinition_OverloadBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> OperationDefinition_OverloadBuilder {
+        let mut __value: Value = json!({});
+        return OperationDefinition_OverloadBuilder { value: __value };
+    }
+
+    pub fn _comment<'a>(&'a mut self, val: Element) -> &'a mut OperationDefinition_OverloadBuilder {
+        self.value["_comment"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _parameter_name<'a>(
+        &'a mut self,
+        val: Vec<Element>,
+    ) -> &'a mut OperationDefinition_OverloadBuilder {
+        self.value["_parameterName"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn comment<'a>(&'a mut self, val: &str) -> &'a mut OperationDefinition_OverloadBuilder {
+        self.value["comment"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut OperationDefinition_OverloadBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut OperationDefinition_OverloadBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut OperationDefinition_OverloadBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn parameter_name<'a>(
+        &'a mut self,
+        val: Vec<&str>,
+    ) -> &'a mut OperationDefinition_OverloadBuilder {
+        self.value["parameterName"] = json!(val);
+        return self;
     }
 }

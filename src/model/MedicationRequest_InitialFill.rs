@@ -3,7 +3,9 @@
 use crate::model::Duration::Duration;
 use crate::model::Extension::Extension;
 use crate::model::Quantity::Quantity;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// An order or request for both supply of the medication and the instructions for
 /// administration of the medication to a patient. The resource is called
@@ -13,14 +15,26 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct MedicationRequest_InitialFill<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl MedicationRequest_InitialFill<'_> {
-    /// The amount or quantity to provide as part of the first dispense.
-    pub fn quantity(&self) -> Option<Quantity> {
-        if let Some(val) = self.value.get("quantity") {
-            return Some(Quantity { value: val });
+    pub fn new(value: &Value) -> MedicationRequest_InitialFill {
+        MedicationRequest_InitialFill {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// The length of time that the first dispense is expected to last.
+    pub fn duration(&self) -> Option<Duration> {
+        if let Some(val) = self.value.get("duration") {
+            return Some(Duration {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -34,9 +48,20 @@ impl MedicationRequest_InitialFill<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -56,48 +81,109 @@ impl MedicationRequest_InitialFill<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// The length of time that the first dispense is expected to last.
-    pub fn duration(&self) -> Option<Duration> {
-        if let Some(val) = self.value.get("duration") {
-            return Some(Duration { value: val });
-        }
-        return None;
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    /// The amount or quantity to provide as part of the first dispense.
+    pub fn quantity(&self) -> Option<Quantity> {
+        if let Some(val) = self.value.get("quantity") {
+            return Some(Quantity {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.quantity() {
-            _val.validate();
+        if let Some(_val) = self.duration() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.duration() {
-            _val.validate();
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.quantity() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct MedicationRequest_InitialFillBuilder {
+    pub(crate) value: Value,
+}
+
+impl MedicationRequest_InitialFillBuilder {
+    pub fn build(&self) -> MedicationRequest_InitialFill {
+        MedicationRequest_InitialFill {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: MedicationRequest_InitialFill) -> MedicationRequest_InitialFillBuilder {
+        MedicationRequest_InitialFillBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> MedicationRequest_InitialFillBuilder {
+        let mut __value: Value = json!({});
+        return MedicationRequest_InitialFillBuilder { value: __value };
+    }
+
+    pub fn duration<'a>(
+        &'a mut self,
+        val: Duration,
+    ) -> &'a mut MedicationRequest_InitialFillBuilder {
+        self.value["duration"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicationRequest_InitialFillBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut MedicationRequest_InitialFillBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicationRequest_InitialFillBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn quantity<'a>(
+        &'a mut self,
+        val: Quantity,
+    ) -> &'a mut MedicationRequest_InitialFillBuilder {
+        self.value["quantity"] = json!(val.value);
+        return self;
     }
 }

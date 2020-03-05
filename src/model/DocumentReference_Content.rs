@@ -3,7 +3,9 @@
 use crate::model::Attachment::Attachment;
 use crate::model::Coding::Coding;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A reference to a document of any kind for any purpose. Provides metadata about
 /// the document so that the document can be discovered and managed. The scope of a
@@ -13,15 +15,25 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct DocumentReference_Content<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl DocumentReference_Content<'_> {
+    pub fn new(value: &Value) -> DocumentReference_Content {
+        DocumentReference_Content {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
     /// The document or URL of the document along with critical metadata to prove
     /// content has integrity.
     pub fn attachment(&self) -> Attachment {
         Attachment {
-            value: &self.value["attachment"],
+            value: Cow::Borrowed(&self.value["attachment"]),
         }
     }
 
@@ -34,9 +46,22 @@ impl DocumentReference_Content<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// An identifier of the document encoding, structure, and template that the
+    /// document conforms to beyond the base format indicated in the mimeType.
+    pub fn format(&self) -> Option<Coding> {
+        if let Some(val) = self.value.get("format") {
+            return Some(Coding {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -65,38 +90,87 @@ impl DocumentReference_Content<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// An identifier of the document encoding, structure, and template that the
-    /// document conforms to beyond the base format indicated in the mimeType.
-    pub fn format(&self) -> Option<Coding> {
-        if let Some(val) = self.value.get("format") {
-            return Some(Coding { value: val });
-        }
-        return None;
-    }
-
     pub fn validate(&self) -> bool {
-        let _ = self.attachment().validate();
+        if !self.attachment().validate() {
+            return false;
+        }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.format() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.format() {
-            _val.validate();
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct DocumentReference_ContentBuilder {
+    pub(crate) value: Value,
+}
+
+impl DocumentReference_ContentBuilder {
+    pub fn build(&self) -> DocumentReference_Content {
+        DocumentReference_Content {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: DocumentReference_Content) -> DocumentReference_ContentBuilder {
+        DocumentReference_ContentBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(attachment: Attachment) -> DocumentReference_ContentBuilder {
+        let mut __value: Value = json!({});
+        __value["attachment"] = json!(attachment.value);
+        return DocumentReference_ContentBuilder { value: __value };
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut DocumentReference_ContentBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn format<'a>(&'a mut self, val: Coding) -> &'a mut DocumentReference_ContentBuilder {
+        self.value["format"] = json!(val.value);
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut DocumentReference_ContentBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut DocumentReference_ContentBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

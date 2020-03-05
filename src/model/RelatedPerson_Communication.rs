@@ -3,7 +3,9 @@
 use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Information about a person that is involved in the care for a patient, but who
 /// is not the target of healthcare, nor has a formal responsibility in the care
@@ -11,26 +13,65 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct RelatedPerson_Communication<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl RelatedPerson_Communication<'_> {
+    pub fn new(value: &Value) -> RelatedPerson_Communication {
+        RelatedPerson_Communication {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for preferred
+    pub fn _preferred(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_preferred") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// May be used to represent additional information that is not part of the basic
+    /// definition of the element. To make the use of extensions safe and manageable,
+    /// there is a strict set of governance  applied to the definition and use of
+    /// extensions. Though any implementer can define an extension, there is a set of
+    /// requirements that SHALL be met as part of the definition of the extension.
+    pub fn extension(&self) -> Option<Vec<Extension>> {
+        if let Some(Value::Array(val)) = self.value.get("extension") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
+    }
+
     /// The ISO-639-1 alpha 2 code in lower case for the language, optionally followed
     /// by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g.
     /// "en" for English, or "en-US" for American English versus "en-EN" for England
     /// English.
     pub fn language(&self) -> CodeableConcept {
         CodeableConcept {
-            value: &self.value["language"],
+            value: Cow::Borrowed(&self.value["language"]),
         }
-    }
-
-    /// Extensions for preferred
-    pub fn _preferred(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_preferred") {
-            return Some(Element { value: val });
-        }
-        return None;
     }
 
     /// May be used to represent additional information that is not part of the basic
@@ -48,7 +89,9 @@ impl RelatedPerson_Communication<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -64,48 +107,87 @@ impl RelatedPerson_Communication<'_> {
         return None;
     }
 
-    /// May be used to represent additional information that is not part of the basic
-    /// definition of the element. To make the use of extensions safe and manageable,
-    /// there is a strict set of governance  applied to the definition and use of
-    /// extensions. Though any implementer can define an extension, there is a set of
-    /// requirements that SHALL be met as part of the definition of the extension.
-    pub fn extension(&self) -> Option<Vec<Extension>> {
-        if let Some(Value::Array(val)) = self.value.get("extension") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Extension { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
-    }
-
     pub fn validate(&self) -> bool {
-        let _ = self.language().validate();
         if let Some(_val) = self._preferred() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.preferred() {}
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
+        if !self.language().validate() {
+            return false;
+        }
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.preferred() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct RelatedPerson_CommunicationBuilder {
+    pub(crate) value: Value,
+}
+
+impl RelatedPerson_CommunicationBuilder {
+    pub fn build(&self) -> RelatedPerson_Communication {
+        RelatedPerson_Communication {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: RelatedPerson_Communication) -> RelatedPerson_CommunicationBuilder {
+        RelatedPerson_CommunicationBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(language: CodeableConcept) -> RelatedPerson_CommunicationBuilder {
+        let mut __value: Value = json!({});
+        __value["language"] = json!(language.value);
+        return RelatedPerson_CommunicationBuilder { value: __value };
+    }
+
+    pub fn _preferred<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut RelatedPerson_CommunicationBuilder {
+        self.value["_preferred"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut RelatedPerson_CommunicationBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut RelatedPerson_CommunicationBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut RelatedPerson_CommunicationBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn preferred<'a>(&'a mut self, val: bool) -> &'a mut RelatedPerson_CommunicationBuilder {
+        self.value["preferred"] = json!(val);
+        return self;
     }
 }

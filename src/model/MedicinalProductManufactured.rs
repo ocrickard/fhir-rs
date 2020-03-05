@@ -9,29 +9,34 @@ use crate::model::ProdCharacteristic::ProdCharacteristic;
 use crate::model::Quantity::Quantity;
 use crate::model::Reference::Reference;
 use crate::model::ResourceList::ResourceList;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// The manufactured item as contained in the packaged medicinal product.
 
 #[derive(Debug)]
 pub struct MedicinalProductManufactured<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl MedicinalProductManufactured<'_> {
-    /// The logical id of the resource, as used in the URL for the resource. Once
-    /// assigned, this value never changes.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    pub fn new(value: &Value) -> MedicinalProductManufactured {
+        MedicinalProductManufactured {
+            value: Cow::Borrowed(value),
         }
-        return None;
     }
 
-    /// The base language in which the resource is written.
-    pub fn language(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("language") {
-            return Some(string);
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for implicitRules
+    pub fn _implicit_rules(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_implicitRules") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -39,7 +44,25 @@ impl MedicinalProductManufactured<'_> {
     /// Extensions for language
     pub fn _language(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_language") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// These resources do not have an independent existence apart from the resource
+    /// that contains them - they cannot be identified independently, and nor can they
+    /// have their own independent transaction scope.
+    pub fn contained(&self) -> Option<Vec<ResourceList>> {
+        if let Some(Value::Array(val)) = self.value.get("contained") {
+            return Some(
+                val.into_iter()
+                    .map(|e| ResourceList {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
@@ -53,9 +76,53 @@ impl MedicinalProductManufactured<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// The logical id of the resource, as used in the URL for the resource. Once
+    /// assigned, this value never changes.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// A reference to a set of rules that were followed when the resource was
+    /// constructed, and which must be understood when processing the content. Often,
+    /// this is a reference to an implementation guide that defines the special rules
+    /// along with other profiles etc.
+    pub fn implicit_rules(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("implicitRules") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Ingredient.
+    pub fn ingredient(&self) -> Option<Vec<Reference>> {
+        if let Some(Value::Array(val)) = self.value.get("ingredient") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Reference {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
+    /// The base language in which the resource is written.
+    pub fn language(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("language") {
+            return Some(string);
         }
         return None;
     }
@@ -64,16 +131,19 @@ impl MedicinalProductManufactured<'_> {
     /// product.
     pub fn manufactured_dose_form(&self) -> CodeableConcept {
         CodeableConcept {
-            value: &self.value["manufacturedDoseForm"],
+            value: Cow::Borrowed(&self.value["manufacturedDoseForm"]),
         }
     }
 
-    /// Other codeable characteristics.
-    pub fn other_characteristics(&self) -> Option<Vec<CodeableConcept>> {
-        if let Some(Value::Array(val)) = self.value.get("otherCharacteristics") {
+    /// Manufacturer of the item (Note that this should be named "manufacturer" but it
+    /// currently causes technical issues).
+    pub fn manufacturer(&self) -> Option<Vec<Reference>> {
+        if let Some(Value::Array(val)) = self.value.get("manufacturer") {
             return Some(
                 val.into_iter()
-                    .map(|e| CodeableConcept { value: e })
+                    .map(|e| Reference {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -85,43 +155,9 @@ impl MedicinalProductManufactured<'_> {
     /// version changes to the resource.
     pub fn meta(&self) -> Option<Meta> {
         if let Some(val) = self.value.get("meta") {
-            return Some(Meta { value: val });
-        }
-        return None;
-    }
-
-    /// Manufacturer of the item (Note that this should be named "manufacturer" but it
-    /// currently causes technical issues).
-    pub fn manufacturer(&self) -> Option<Vec<Reference>> {
-        if let Some(Value::Array(val)) = self.value.get("manufacturer") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Reference { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// The “real world” units in which the quantity of the manufactured item is
-    /// described.
-    pub fn unit_of_presentation(&self) -> Option<CodeableConcept> {
-        if let Some(val) = self.value.get("unitOfPresentation") {
-            return Some(CodeableConcept { value: val });
-        }
-        return None;
-    }
-
-    /// These resources do not have an independent existence apart from the resource
-    /// that contains them - they cannot be identified independently, and nor can they
-    /// have their own independent transaction scope.
-    pub fn contained(&self) -> Option<Vec<ResourceList>> {
-        if let Some(Value::Array(val)) = self.value.get("contained") {
-            return Some(
-                val.into_iter()
-                    .map(|e| ResourceList { value: e })
-                    .collect::<Vec<_>>(),
-            );
+            return Some(Meta {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -142,40 +178,25 @@ impl MedicinalProductManufactured<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Ingredient.
-    pub fn ingredient(&self) -> Option<Vec<Reference>> {
-        if let Some(Value::Array(val)) = self.value.get("ingredient") {
+    /// Other codeable characteristics.
+    pub fn other_characteristics(&self) -> Option<Vec<CodeableConcept>> {
+        if let Some(Value::Array(val)) = self.value.get("otherCharacteristics") {
             return Some(
                 val.into_iter()
-                    .map(|e| Reference { value: e })
+                    .map(|e| CodeableConcept {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
-        }
-        return None;
-    }
-
-    /// Extensions for implicitRules
-    pub fn _implicit_rules(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_implicitRules") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// A reference to a set of rules that were followed when the resource was
-    /// constructed, and which must be understood when processing the content. Often,
-    /// this is a reference to an implementation guide that defines the special rules
-    /// along with other profiles etc.
-    pub fn implicit_rules(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("implicitRules") {
-            return Some(string);
         }
         return None;
     }
@@ -183,7 +204,9 @@ impl MedicinalProductManufactured<'_> {
     /// Dimensions, color etc.
     pub fn physical_characteristics(&self) -> Option<ProdCharacteristic> {
         if let Some(val) = self.value.get("physicalCharacteristics") {
-            return Some(ProdCharacteristic { value: val });
+            return Some(ProdCharacteristic {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -191,7 +214,7 @@ impl MedicinalProductManufactured<'_> {
     /// The quantity or "count number" of the manufactured item.
     pub fn quantity(&self) -> Quantity {
         Quantity {
-            value: &self.value["quantity"],
+            value: Cow::Borrowed(&self.value["quantity"]),
         }
     }
 
@@ -203,65 +226,233 @@ impl MedicinalProductManufactured<'_> {
     /// ensure clinical safety.
     pub fn text(&self) -> Option<Narrative> {
         if let Some(val) = self.value.get("text") {
-            return Some(Narrative { value: val });
+            return Some(Narrative {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// The “real world” units in which the quantity of the manufactured item is
+    /// described.
+    pub fn unit_of_presentation(&self) -> Option<CodeableConcept> {
+        if let Some(val) = self.value.get("unitOfPresentation") {
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.language() {}
+        if let Some(_val) = self._implicit_rules() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         if let Some(_val) = self._language() {
-            _val.validate();
-        }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        let _ = self.manufactured_dose_form().validate();
-        if let Some(_val) = self.other_characteristics() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.meta() {
-            _val.validate();
-        }
-        if let Some(_val) = self.manufacturer() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.unit_of_presentation() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.contained() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.implicit_rules() {}
+        if let Some(_val) = self.ingredient() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.language() {}
+        if !self.manufactured_dose_form().validate() {
+            return false;
+        }
+        if let Some(_val) = self.manufacturer() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.meta() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self.ingredient() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self.other_characteristics() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self._implicit_rules() {
-            _val.validate();
-        }
-        if let Some(_val) = self.implicit_rules() {}
         if let Some(_val) = self.physical_characteristics() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        let _ = self.quantity().validate();
+        if !self.quantity().validate() {
+            return false;
+        }
         if let Some(_val) = self.text() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.unit_of_presentation() {
+            if !_val.validate() {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct MedicinalProductManufacturedBuilder {
+    pub(crate) value: Value,
+}
+
+impl MedicinalProductManufacturedBuilder {
+    pub fn build(&self) -> MedicinalProductManufactured {
+        MedicinalProductManufactured {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: MedicinalProductManufactured) -> MedicinalProductManufacturedBuilder {
+        MedicinalProductManufacturedBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(
+        manufactured_dose_form: CodeableConcept,
+        quantity: Quantity,
+    ) -> MedicinalProductManufacturedBuilder {
+        let mut __value: Value = json!({});
+        __value["manufacturedDoseForm"] = json!(manufactured_dose_form.value);
+        __value["quantity"] = json!(quantity.value);
+        return MedicinalProductManufacturedBuilder { value: __value };
+    }
+
+    pub fn _implicit_rules<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["_implicitRules"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _language<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["_language"] = json!(val.value);
+        return self;
+    }
+
+    pub fn contained<'a>(
+        &'a mut self,
+        val: Vec<ResourceList>,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["contained"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn implicit_rules<'a>(
+        &'a mut self,
+        val: &str,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["implicitRules"] = json!(val);
+        return self;
+    }
+
+    pub fn ingredient<'a>(
+        &'a mut self,
+        val: Vec<Reference>,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["ingredient"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn language<'a>(&'a mut self, val: &str) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["language"] = json!(val);
+        return self;
+    }
+
+    pub fn manufacturer<'a>(
+        &'a mut self,
+        val: Vec<Reference>,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["manufacturer"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn meta<'a>(&'a mut self, val: Meta) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["meta"] = json!(val.value);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn other_characteristics<'a>(
+        &'a mut self,
+        val: Vec<CodeableConcept>,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["otherCharacteristics"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn physical_characteristics<'a>(
+        &'a mut self,
+        val: ProdCharacteristic,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["physicalCharacteristics"] = json!(val.value);
+        return self;
+    }
+
+    pub fn text<'a>(&'a mut self, val: Narrative) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["text"] = json!(val.value);
+        return self;
+    }
+
+    pub fn unit_of_presentation<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut MedicinalProductManufacturedBuilder {
+        self.value["unitOfPresentation"] = json!(val.value);
+        return self;
     }
 }

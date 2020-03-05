@@ -4,7 +4,9 @@ use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::GraphDefinition_Compartment::GraphDefinition_Compartment;
 use crate::model::GraphDefinition_Link::GraphDefinition_Link;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A formal computable definition of a graph of resources - that is, a coherent set
 /// of resources that form a graph by following references. The Graph Definition
@@ -12,24 +14,48 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct GraphDefinition_Target<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl GraphDefinition_Target<'_> {
-    /// Extensions for type
-    pub fn _type(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_type") {
-            return Some(Element { value: val });
+    pub fn new(value: &Value) -> GraphDefinition_Target {
+        GraphDefinition_Target {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for params
+    pub fn _params(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_params") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// Additional links from target resource.
-    pub fn link(&self) -> Option<Vec<GraphDefinition_Link>> {
-        if let Some(Value::Array(val)) = self.value.get("link") {
+    /// Extensions for type
+    pub fn _type(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_type") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Compartment Consistency Rules.
+    pub fn compartment(&self) -> Option<Vec<GraphDefinition_Compartment>> {
+        if let Some(Value::Array(val)) = self.value.get("compartment") {
             return Some(
                 val.into_iter()
-                    .map(|e| GraphDefinition_Link { value: e })
+                    .map(|e| GraphDefinition_Compartment {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -45,7 +71,32 @@ impl GraphDefinition_Target<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Additional links from target resource.
+    pub fn link(&self) -> Option<Vec<GraphDefinition_Link>> {
+        if let Some(Value::Array(val)) = self.value.get("link") {
+            return Some(
+                val.into_iter()
+                    .map(|e| GraphDefinition_Link {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -67,7 +118,9 @@ impl GraphDefinition_Target<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -77,23 +130,6 @@ impl GraphDefinition_Target<'_> {
     /// A set of parameters to look up.
     pub fn params(&self) -> Option<&str> {
         if let Some(Value::String(string)) = self.value.get("params") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for params
-    pub fn _params(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_params") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
         }
         return None;
@@ -115,49 +151,128 @@ impl GraphDefinition_Target<'_> {
         return None;
     }
 
-    /// Compartment Consistency Rules.
-    pub fn compartment(&self) -> Option<Vec<GraphDefinition_Compartment>> {
-        if let Some(Value::Array(val)) = self.value.get("compartment") {
-            return Some(
-                val.into_iter()
-                    .map(|e| GraphDefinition_Compartment { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self._type() {
-            _val.validate();
+        if let Some(_val) = self._params() {
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.link() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self._type() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.compartment() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.params() {}
-        if let Some(_val) = self._params() {
-            _val.validate();
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
+        if let Some(_val) = self.link() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.params() {}
         if let Some(_val) = self.profile() {}
         if let Some(_val) = self.fhir_type() {}
-        if let Some(_val) = self.compartment() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct GraphDefinition_TargetBuilder {
+    pub(crate) value: Value,
+}
+
+impl GraphDefinition_TargetBuilder {
+    pub fn build(&self) -> GraphDefinition_Target {
+        GraphDefinition_Target {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: GraphDefinition_Target) -> GraphDefinition_TargetBuilder {
+        GraphDefinition_TargetBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> GraphDefinition_TargetBuilder {
+        let mut __value: Value = json!({});
+        return GraphDefinition_TargetBuilder { value: __value };
+    }
+
+    pub fn _params<'a>(&'a mut self, val: Element) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["_params"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _type<'a>(&'a mut self, val: Element) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["_type"] = json!(val.value);
+        return self;
+    }
+
+    pub fn compartment<'a>(
+        &'a mut self,
+        val: Vec<GraphDefinition_Compartment>,
+    ) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["compartment"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn link<'a>(
+        &'a mut self,
+        val: Vec<GraphDefinition_Link>,
+    ) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["link"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn params<'a>(&'a mut self, val: &str) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["params"] = json!(val);
+        return self;
+    }
+
+    pub fn profile<'a>(&'a mut self, val: &str) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["profile"] = json!(val);
+        return self;
+    }
+
+    pub fn fhir_type<'a>(&'a mut self, val: &str) -> &'a mut GraphDefinition_TargetBuilder {
+        self.value["type"] = json!(val);
+        return self;
     }
 }

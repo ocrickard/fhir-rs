@@ -2,17 +2,49 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A structured set of tests against a FHIR server or client implementation to
 /// determine compliance against the FHIR specification.
 
 #[derive(Debug)]
 pub struct TestScript_RequestHeader<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl TestScript_RequestHeader<'_> {
+    pub fn new(value: &Value) -> TestScript_RequestHeader {
+        TestScript_RequestHeader {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for field
+    pub fn _field(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_field") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for value
+    pub fn _value(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_value") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
     /// May be used to represent additional information that is not part of the basic
     /// definition of the element. To make the use of extensions safe and manageable,
     /// there is a strict set of governance  applied to the definition and use of
@@ -22,7 +54,9 @@ impl TestScript_RequestHeader<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -33,30 +67,6 @@ impl TestScript_RequestHeader<'_> {
     pub fn field(&self) -> Option<&str> {
         if let Some(Value::String(string)) = self.value.get("field") {
             return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for field
-    pub fn _field(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_field") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// The value of the header e.g. "application/fhir+xml".
-    pub fn value(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("value") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for value
-    pub fn _value(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_value") {
-            return Some(Element { value: val });
         }
         return None;
     }
@@ -85,33 +95,113 @@ impl TestScript_RequestHeader<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
+    /// The value of the header e.g. "application/fhir+xml".
+    pub fn value(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("value") {
+            return Some(string);
+        }
+        return None;
+    }
+
     pub fn validate(&self) -> bool {
+        if let Some(_val) = self._field() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.field() {}
-        if let Some(_val) = self._field() {
-            _val.validate();
-        }
-        if let Some(_val) = self.value() {}
-        if let Some(_val) = self._value() {
-            _val.validate();
-        }
         if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.value() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct TestScript_RequestHeaderBuilder {
+    pub(crate) value: Value,
+}
+
+impl TestScript_RequestHeaderBuilder {
+    pub fn build(&self) -> TestScript_RequestHeader {
+        TestScript_RequestHeader {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: TestScript_RequestHeader) -> TestScript_RequestHeaderBuilder {
+        TestScript_RequestHeaderBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> TestScript_RequestHeaderBuilder {
+        let mut __value: Value = json!({});
+        return TestScript_RequestHeaderBuilder { value: __value };
+    }
+
+    pub fn _field<'a>(&'a mut self, val: Element) -> &'a mut TestScript_RequestHeaderBuilder {
+        self.value["_field"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value<'a>(&'a mut self, val: Element) -> &'a mut TestScript_RequestHeaderBuilder {
+        self.value["_value"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut TestScript_RequestHeaderBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn field<'a>(&'a mut self, val: &str) -> &'a mut TestScript_RequestHeaderBuilder {
+        self.value["field"] = json!(val);
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut TestScript_RequestHeaderBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut TestScript_RequestHeaderBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn value<'a>(&'a mut self, val: &str) -> &'a mut TestScript_RequestHeaderBuilder {
+        self.value["value"] = json!(val);
+        return self;
     }
 }

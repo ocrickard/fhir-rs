@@ -3,7 +3,9 @@
 use crate::model::Coding::Coding;
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A Capability Statement documents a set of capabilities (behaviors) of a FHIR
 /// Server for a particular version of FHIR that may be used as a statement of
@@ -12,22 +14,34 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct CapabilityStatement_Endpoint<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl CapabilityStatement_Endpoint<'_> {
-    /// A list of the messaging transport protocol(s) identifiers, supported by this
-    /// endpoint.
-    pub fn protocol(&self) -> Coding {
-        Coding {
-            value: &self.value["protocol"],
+    pub fn new(value: &Value) -> CapabilityStatement_Endpoint {
+        CapabilityStatement_Endpoint {
+            value: Cow::Borrowed(value),
         }
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for address
+    pub fn _address(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_address") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// The network address of the endpoint. For solutions that do not use network
+    /// addresses for routing, it can be just an identifier.
+    pub fn address(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("address") {
             return Some(string);
         }
         return None;
@@ -42,17 +56,19 @@ impl CapabilityStatement_Endpoint<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// The network address of the endpoint. For solutions that do not use network
-    /// addresses for routing, it can be just an identifier.
-    pub fn address(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("address") {
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
         }
         return None;
@@ -73,38 +89,101 @@ impl CapabilityStatement_Endpoint<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for address
-    pub fn _address(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_address") {
-            return Some(Element { value: val });
+    /// A list of the messaging transport protocol(s) identifiers, supported by this
+    /// endpoint.
+    pub fn protocol(&self) -> Coding {
+        Coding {
+            value: Cow::Borrowed(&self.value["protocol"]),
         }
-        return None;
     }
 
     pub fn validate(&self) -> bool {
-        let _ = self.protocol().validate();
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self._address() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.address() {}
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self._address() {
-            _val.validate();
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if !self.protocol().validate() {
+            return false;
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct CapabilityStatement_EndpointBuilder {
+    pub(crate) value: Value,
+}
+
+impl CapabilityStatement_EndpointBuilder {
+    pub fn build(&self) -> CapabilityStatement_Endpoint {
+        CapabilityStatement_Endpoint {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: CapabilityStatement_Endpoint) -> CapabilityStatement_EndpointBuilder {
+        CapabilityStatement_EndpointBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(protocol: Coding) -> CapabilityStatement_EndpointBuilder {
+        let mut __value: Value = json!({});
+        __value["protocol"] = json!(protocol.value);
+        return CapabilityStatement_EndpointBuilder { value: __value };
+    }
+
+    pub fn _address<'a>(&'a mut self, val: Element) -> &'a mut CapabilityStatement_EndpointBuilder {
+        self.value["_address"] = json!(val.value);
+        return self;
+    }
+
+    pub fn address<'a>(&'a mut self, val: &str) -> &'a mut CapabilityStatement_EndpointBuilder {
+        self.value["address"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut CapabilityStatement_EndpointBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut CapabilityStatement_EndpointBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut CapabilityStatement_EndpointBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

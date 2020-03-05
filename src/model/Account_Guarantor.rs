@@ -4,31 +4,35 @@ use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::Period::Period;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A financial tool for tracking value accrued for a particular purpose.  In the
 /// healthcare field, used to track charges for a patient, cost centers, etc.
 
 #[derive(Debug)]
 pub struct Account_Guarantor<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl Account_Guarantor<'_> {
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    pub fn new(value: &Value) -> Account_Guarantor {
+        Account_Guarantor {
+            value: Cow::Borrowed(value),
         }
-        return None;
     }
 
-    /// A guarantor may be placed on credit hold or otherwise have their role
-    /// temporarily suspended.
-    pub fn on_hold(&self) -> Option<bool> {
-        if let Some(val) = self.value.get("onHold") {
-            return Some(val.as_bool().unwrap());
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for onHold
+    pub fn _on_hold(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_onHold") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -42,9 +46,20 @@ impl Account_Guarantor<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -64,9 +79,20 @@ impl Account_Guarantor<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// A guarantor may be placed on credit hold or otherwise have their role
+    /// temporarily suspended.
+    pub fn on_hold(&self) -> Option<bool> {
+        if let Some(val) = self.value.get("onHold") {
+            return Some(val.as_bool().unwrap());
         }
         return None;
     }
@@ -74,46 +100,105 @@ impl Account_Guarantor<'_> {
     /// The entity who is responsible.
     pub fn party(&self) -> Reference {
         Reference {
-            value: &self.value["party"],
+            value: Cow::Borrowed(&self.value["party"]),
         }
-    }
-
-    /// Extensions for onHold
-    pub fn _on_hold(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_onHold") {
-            return Some(Element { value: val });
-        }
-        return None;
     }
 
     /// The timeframe during which the guarantor accepts responsibility for the account.
     pub fn period(&self) -> Option<Period> {
         if let Some(val) = self.value.get("period") {
-            return Some(Period { value: val });
+            return Some(Period {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.on_hold() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        let _ = self.party().validate();
         if let Some(_val) = self._on_hold() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.on_hold() {}
+        if !self.party().validate() {
+            return false;
         }
         if let Some(_val) = self.period() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct Account_GuarantorBuilder {
+    pub(crate) value: Value,
+}
+
+impl Account_GuarantorBuilder {
+    pub fn build(&self) -> Account_Guarantor {
+        Account_Guarantor {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: Account_Guarantor) -> Account_GuarantorBuilder {
+        Account_GuarantorBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(party: Reference) -> Account_GuarantorBuilder {
+        let mut __value: Value = json!({});
+        __value["party"] = json!(party.value);
+        return Account_GuarantorBuilder { value: __value };
+    }
+
+    pub fn _on_hold<'a>(&'a mut self, val: Element) -> &'a mut Account_GuarantorBuilder {
+        self.value["_onHold"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut Account_GuarantorBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut Account_GuarantorBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Account_GuarantorBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn on_hold<'a>(&'a mut self, val: bool) -> &'a mut Account_GuarantorBuilder {
+        self.value["onHold"] = json!(val);
+        return self;
+    }
+
+    pub fn period<'a>(&'a mut self, val: Period) -> &'a mut Account_GuarantorBuilder {
+        self.value["period"] = json!(val.value);
+        return self;
     }
 }

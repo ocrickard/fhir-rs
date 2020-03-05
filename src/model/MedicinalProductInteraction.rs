@@ -8,43 +8,90 @@ use crate::model::Meta::Meta;
 use crate::model::Narrative::Narrative;
 use crate::model::Reference::Reference;
 use crate::model::ResourceList::ResourceList;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// The interactions of the medicinal product with other medicinal products, or
 /// other forms of interactions.
 
 #[derive(Debug)]
 pub struct MedicinalProductInteraction<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl MedicinalProductInteraction<'_> {
-    /// The metadata about the resource. This is content that is maintained by the
-    /// infrastructure. Changes to the content might not always be associated with
-    /// version changes to the resource.
-    pub fn meta(&self) -> Option<Meta> {
-        if let Some(val) = self.value.get("meta") {
-            return Some(Meta { value: val });
+    pub fn new(value: &Value) -> MedicinalProductInteraction {
+        MedicinalProductInteraction {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for description
+    pub fn _description(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_description") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// The medication for which this is a described interaction.
-    pub fn subject(&self) -> Option<Vec<Reference>> {
-        if let Some(Value::Array(val)) = self.value.get("subject") {
+    /// Extensions for implicitRules
+    pub fn _implicit_rules(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_implicitRules") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for language
+    pub fn _language(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_language") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// These resources do not have an independent existence apart from the resource
+    /// that contains them - they cannot be identified independently, and nor can they
+    /// have their own independent transaction scope.
+    pub fn contained(&self) -> Option<Vec<ResourceList>> {
+        if let Some(Value::Array(val)) = self.value.get("contained") {
             return Some(
                 val.into_iter()
-                    .map(|e| Reference { value: e })
+                    .map(|e| ResourceList {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for description
-    pub fn _description(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_description") {
-            return Some(Element { value: val });
+    /// The interaction described.
+    pub fn description(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("description") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// The effect of the interaction, for example "reduced gastric absorption of
+    /// primary medication".
+    pub fn effect(&self) -> Option<CodeableConcept> {
+        if let Some(val) = self.value.get("effect") {
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -58,30 +105,20 @@ impl MedicinalProductInteraction<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// The effect of the interaction, for example "reduced gastric absorption of
-    /// primary medication".
-    pub fn effect(&self) -> Option<CodeableConcept> {
-        if let Some(val) = self.value.get("effect") {
-            return Some(CodeableConcept { value: val });
-        }
-        return None;
-    }
-
-    /// The specific medication, food or laboratory test that interacts.
-    pub fn interactant(&self) -> Option<Vec<MedicinalProductInteraction_Interactant>> {
-        if let Some(Value::Array(val)) = self.value.get("interactant") {
-            return Some(
-                val.into_iter()
-                    .map(|e| MedicinalProductInteraction_Interactant { value: e })
-                    .collect::<Vec<_>>(),
-            );
+    /// The logical id of the resource, as used in the URL for the resource. Once
+    /// assigned, this value never changes.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -97,65 +134,26 @@ impl MedicinalProductInteraction<'_> {
         return None;
     }
 
-    /// The type of the interaction e.g. drug-drug interaction, drug-food interaction,
-    /// drug-lab test interaction.
-    pub fn fhir_type(&self) -> Option<CodeableConcept> {
-        if let Some(val) = self.value.get("type") {
-            return Some(CodeableConcept { value: val });
-        }
-        return None;
-    }
-
-    /// The interaction described.
-    pub fn description(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("description") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// The logical id of the resource, as used in the URL for the resource. Once
-    /// assigned, this value never changes.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
-    }
-
     /// The incidence of the interaction, e.g. theoretical, observed.
     pub fn incidence(&self) -> Option<CodeableConcept> {
         if let Some(val) = self.value.get("incidence") {
-            return Some(CodeableConcept { value: val });
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// A human-readable narrative that contains a summary of the resource and can be
-    /// used to represent the content of the resource to a human. The narrative need not
-    /// encode all the structured data, but is required to contain sufficient detail to
-    /// make it "clinically safe" for a human to just read the narrative. Resource
-    /// definitions may define what content should be represented in the narrative to
-    /// ensure clinical safety.
-    pub fn text(&self) -> Option<Narrative> {
-        if let Some(val) = self.value.get("text") {
-            return Some(Narrative { value: val });
-        }
-        return None;
-    }
-
-    /// Actions for managing the interaction.
-    pub fn management(&self) -> Option<CodeableConcept> {
-        if let Some(val) = self.value.get("management") {
-            return Some(CodeableConcept { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for implicitRules
-    pub fn _implicit_rules(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_implicitRules") {
-            return Some(Element { value: val });
+    /// The specific medication, food or laboratory test that interacts.
+    pub fn interactant(&self) -> Option<Vec<MedicinalProductInteraction_Interactant>> {
+        if let Some(Value::Array(val)) = self.value.get("interactant") {
+            return Some(
+                val.into_iter()
+                    .map(|e| MedicinalProductInteraction_Interactant {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
@@ -168,10 +166,24 @@ impl MedicinalProductInteraction<'_> {
         return None;
     }
 
-    /// Extensions for language
-    pub fn _language(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_language") {
-            return Some(Element { value: val });
+    /// Actions for managing the interaction.
+    pub fn management(&self) -> Option<CodeableConcept> {
+        if let Some(val) = self.value.get("management") {
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// The metadata about the resource. This is content that is maintained by the
+    /// infrastructure. Changes to the content might not always be associated with
+    /// version changes to the resource.
+    pub fn meta(&self) -> Option<Meta> {
+        if let Some(val) = self.value.get("meta") {
+            return Some(Meta {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -192,84 +204,281 @@ impl MedicinalProductInteraction<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// These resources do not have an independent existence apart from the resource
-    /// that contains them - they cannot be identified independently, and nor can they
-    /// have their own independent transaction scope.
-    pub fn contained(&self) -> Option<Vec<ResourceList>> {
-        if let Some(Value::Array(val)) = self.value.get("contained") {
+    /// The medication for which this is a described interaction.
+    pub fn subject(&self) -> Option<Vec<Reference>> {
+        if let Some(Value::Array(val)) = self.value.get("subject") {
             return Some(
                 val.into_iter()
-                    .map(|e| ResourceList { value: e })
+                    .map(|e| Reference {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// A human-readable narrative that contains a summary of the resource and can be
+    /// used to represent the content of the resource to a human. The narrative need not
+    /// encode all the structured data, but is required to contain sufficient detail to
+    /// make it "clinically safe" for a human to just read the narrative. Resource
+    /// definitions may define what content should be represented in the narrative to
+    /// ensure clinical safety.
+    pub fn text(&self) -> Option<Narrative> {
+        if let Some(val) = self.value.get("text") {
+            return Some(Narrative {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// The type of the interaction e.g. drug-drug interaction, drug-food interaction,
+    /// drug-lab test interaction.
+    pub fn fhir_type(&self) -> Option<CodeableConcept> {
+        if let Some(val) = self.value.get("type") {
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.meta() {
-            _val.validate();
-        }
-        if let Some(_val) = self.subject() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
         if let Some(_val) = self._description() {
-            _val.validate();
-        }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.effect() {
-            _val.validate();
-        }
-        if let Some(_val) = self.interactant() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.implicit_rules() {}
-        if let Some(_val) = self.fhir_type() {
-            _val.validate();
-        }
-        if let Some(_val) = self.description() {}
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.incidence() {
-            _val.validate();
-        }
-        if let Some(_val) = self.text() {
-            _val.validate();
-        }
-        if let Some(_val) = self.management() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._implicit_rules() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.language() {}
         if let Some(_val) = self._language() {
-            _val.validate();
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.contained() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.description() {}
+        if let Some(_val) = self.effect() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.implicit_rules() {}
+        if let Some(_val) = self.incidence() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.interactant() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.language() {}
+        if let Some(_val) = self.management() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.meta() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.subject() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.text() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.fhir_type() {
+            if !_val.validate() {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct MedicinalProductInteractionBuilder {
+    pub(crate) value: Value,
+}
+
+impl MedicinalProductInteractionBuilder {
+    pub fn build(&self) -> MedicinalProductInteraction {
+        MedicinalProductInteraction {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: MedicinalProductInteraction) -> MedicinalProductInteractionBuilder {
+        MedicinalProductInteractionBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> MedicinalProductInteractionBuilder {
+        let mut __value: Value = json!({});
+        return MedicinalProductInteractionBuilder { value: __value };
+    }
+
+    pub fn _description<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["_description"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _implicit_rules<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["_implicitRules"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _language<'a>(&'a mut self, val: Element) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["_language"] = json!(val.value);
+        return self;
+    }
+
+    pub fn contained<'a>(
+        &'a mut self,
+        val: Vec<ResourceList>,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["contained"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn description<'a>(&'a mut self, val: &str) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["description"] = json!(val);
+        return self;
+    }
+
+    pub fn effect<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["effect"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn implicit_rules<'a>(
+        &'a mut self,
+        val: &str,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["implicitRules"] = json!(val);
+        return self;
+    }
+
+    pub fn incidence<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["incidence"] = json!(val.value);
+        return self;
+    }
+
+    pub fn interactant<'a>(
+        &'a mut self,
+        val: Vec<MedicinalProductInteraction_Interactant>,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["interactant"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn language<'a>(&'a mut self, val: &str) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["language"] = json!(val);
+        return self;
+    }
+
+    pub fn management<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["management"] = json!(val.value);
+        return self;
+    }
+
+    pub fn meta<'a>(&'a mut self, val: Meta) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["meta"] = json!(val.value);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn subject<'a>(
+        &'a mut self,
+        val: Vec<Reference>,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["subject"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn text<'a>(&'a mut self, val: Narrative) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["text"] = json!(val.value);
+        return self;
+    }
+
+    pub fn fhir_type<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut MedicinalProductInteractionBuilder {
+        self.value["type"] = json!(val.value);
+        return self;
     }
 }

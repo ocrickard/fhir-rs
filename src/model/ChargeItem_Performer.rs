@@ -3,7 +3,9 @@
 use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Extension::Extension;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// The resource ChargeItem describes the provision of healthcare provider products
 /// for a certain patient, therefore referring not only to the product, but
@@ -13,17 +15,25 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct ChargeItem_Performer<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl ChargeItem_Performer<'_> {
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    pub fn new(value: &Value) -> ChargeItem_Performer {
+        ChargeItem_Performer {
+            value: Cow::Borrowed(value),
         }
-        return None;
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// The device, practitioner, etc. who performed or participated in the service.
+    pub fn actor(&self) -> Reference {
+        Reference {
+            value: Cow::Borrowed(&self.value["actor"]),
+        }
     }
 
     /// May be used to represent additional information that is not part of the basic
@@ -35,25 +45,31 @@ impl ChargeItem_Performer<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// The device, practitioner, etc. who performed or participated in the service.
-    pub fn actor(&self) -> Reference {
-        Reference {
-            value: &self.value["actor"],
-        }
-    }
-
     /// Describes the type of performance or participation(e.g. primary surgeon,
     /// anesthesiologiest, etc.).
     pub fn function(&self) -> Option<CodeableConcept> {
         if let Some(val) = self.value.get("function") {
-            return Some(CodeableConcept { value: val });
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -73,7 +89,9 @@ impl ChargeItem_Performer<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -81,21 +99,74 @@ impl ChargeItem_Performer<'_> {
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.id() {}
+        if !self.actor().validate() {
+            return false;
+        }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        let _ = self.actor().validate();
         if let Some(_val) = self.function() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct ChargeItem_PerformerBuilder {
+    pub(crate) value: Value,
+}
+
+impl ChargeItem_PerformerBuilder {
+    pub fn build(&self) -> ChargeItem_Performer {
+        ChargeItem_Performer {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: ChargeItem_Performer) -> ChargeItem_PerformerBuilder {
+        ChargeItem_PerformerBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(actor: Reference) -> ChargeItem_PerformerBuilder {
+        let mut __value: Value = json!({});
+        __value["actor"] = json!(actor.value);
+        return ChargeItem_PerformerBuilder { value: __value };
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut ChargeItem_PerformerBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn function<'a>(&'a mut self, val: CodeableConcept) -> &'a mut ChargeItem_PerformerBuilder {
+        self.value["function"] = json!(val.value);
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut ChargeItem_PerformerBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ChargeItem_PerformerBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

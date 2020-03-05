@@ -3,7 +3,9 @@
 use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A type of a manufactured item that is used in the provision of healthcare
 /// without being substantially changed through that activity. The device may be a
@@ -11,32 +13,28 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct Device_Specialization<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl Device_Specialization<'_> {
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    pub fn new(value: &Value) -> Device_Specialization {
+        Device_Specialization {
+            value: Cow::Borrowed(value),
         }
-        return None;
     }
 
-    /// The version of the standard that is used to operate and communicate.
-    pub fn version(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("version") {
-            return Some(string);
-        }
-        return None;
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
-    /// The standard that is used to operate and communicate.
-    pub fn system_type(&self) -> CodeableConcept {
-        CodeableConcept {
-            value: &self.value["systemType"],
+    /// Extensions for version
+    pub fn _version(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_version") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
+        return None;
     }
 
     /// May be used to represent additional information that is not part of the basic
@@ -48,9 +46,20 @@ impl Device_Specialization<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -70,38 +79,108 @@ impl Device_Specialization<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for version
-    pub fn _version(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_version") {
-            return Some(Element { value: val });
+    /// The standard that is used to operate and communicate.
+    pub fn system_type(&self) -> CodeableConcept {
+        CodeableConcept {
+            value: Cow::Borrowed(&self.value["systemType"]),
+        }
+    }
+
+    /// The version of the standard that is used to operate and communicate.
+    pub fn version(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("version") {
+            return Some(string);
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.version() {}
-        let _ = self.system_type().validate();
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
         if let Some(_val) = self._version() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if !self.system_type().validate() {
+            return false;
+        }
+        if let Some(_val) = self.version() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct Device_SpecializationBuilder {
+    pub(crate) value: Value,
+}
+
+impl Device_SpecializationBuilder {
+    pub fn build(&self) -> Device_Specialization {
+        Device_Specialization {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: Device_Specialization) -> Device_SpecializationBuilder {
+        Device_SpecializationBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(system_type: CodeableConcept) -> Device_SpecializationBuilder {
+        let mut __value: Value = json!({});
+        __value["systemType"] = json!(system_type.value);
+        return Device_SpecializationBuilder { value: __value };
+    }
+
+    pub fn _version<'a>(&'a mut self, val: Element) -> &'a mut Device_SpecializationBuilder {
+        self.value["_version"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Device_SpecializationBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut Device_SpecializationBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Device_SpecializationBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn version<'a>(&'a mut self, val: &str) -> &'a mut Device_SpecializationBuilder {
+        self.value["version"] = json!(val);
+        return self;
     }
 }

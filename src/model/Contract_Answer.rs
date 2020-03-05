@@ -6,89 +6,55 @@ use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::Quantity::Quantity;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Legally enforceable, formally recorded unilateral or bilateral directive i.e., a
 /// policy or agreement.
 
 #[derive(Debug)]
 pub struct Contract_Answer<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl Contract_Answer<'_> {
-    /// Extensions for valueUri
-    pub fn _value_uri(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueUri") {
-            return Some(Element { value: val });
+    pub fn new(value: &Value) -> Contract_Answer {
+        Contract_Answer {
+            value: Cow::Borrowed(value),
         }
-        return None;
     }
 
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_boolean(&self) -> Option<bool> {
-        if let Some(val) = self.value.get("valueBoolean") {
-            return Some(val.as_bool().unwrap());
-        }
-        return None;
-    }
-
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_date_time(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("valueDateTime") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for valueTime
-    pub fn _value_time(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueTime") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for valueInteger
-    pub fn _value_integer(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueInteger") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_reference(&self) -> Option<Reference> {
-        if let Some(val) = self.value.get("valueReference") {
-            return Some(Reference { value: val });
-        }
-        return None;
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
     /// Extensions for valueBoolean
     pub fn _value_boolean(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_valueBoolean") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_quantity(&self) -> Option<Quantity> {
-        if let Some(val) = self.value.get("valueQuantity") {
-            return Some(Quantity { value: val });
+    /// Extensions for valueDate
+    pub fn _value_date(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueDate") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for valueDateTime
+    pub fn _value_date_time(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueDateTime") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -96,16 +62,49 @@ impl Contract_Answer<'_> {
     /// Extensions for valueDecimal
     pub fn _value_decimal(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_valueDecimal") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    /// Extensions for valueInteger
+    pub fn _value_integer(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueInteger") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for valueString
+    pub fn _value_string(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueString") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for valueTime
+    pub fn _value_time(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueTime") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for valueUri
+    pub fn _value_uri(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueUri") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -119,98 +118,19 @@ impl Contract_Answer<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for valueDate
-    pub fn _value_date(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueDate") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for valueString
-    pub fn _value_string(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueString") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for valueDateTime
-    pub fn _value_date_time(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueDateTime") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_attachment(&self) -> Option<Attachment> {
-        if let Some(val) = self.value.get("valueAttachment") {
-            return Some(Attachment { value: val });
-        }
-        return None;
-    }
-
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_coding(&self) -> Option<Coding> {
-        if let Some(val) = self.value.get("valueCoding") {
-            return Some(Coding { value: val });
-        }
-        return None;
-    }
-
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_integer(&self) -> Option<f64> {
-        if let Some(val) = self.value.get("valueInteger") {
-            return Some(val.as_f64().unwrap());
-        }
-        return None;
-    }
-
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_decimal(&self) -> Option<f64> {
-        if let Some(val) = self.value.get("valueDecimal") {
-            return Some(val.as_f64().unwrap());
-        }
-        return None;
-    }
-
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_date(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("valueDate") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Response to an offer clause or question text,  which enables selection of values
-    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
-    /// rental, warrently duration, or whether biospecimen may be used for further
-    /// research.
-    pub fn value_time(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("valueTime") {
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
         }
         return None;
@@ -231,9 +151,118 @@ impl Contract_Answer<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_attachment(&self) -> Option<Attachment> {
+        if let Some(val) = self.value.get("valueAttachment") {
+            return Some(Attachment {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_boolean(&self) -> Option<bool> {
+        if let Some(val) = self.value.get("valueBoolean") {
+            return Some(val.as_bool().unwrap());
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_coding(&self) -> Option<Coding> {
+        if let Some(val) = self.value.get("valueCoding") {
+            return Some(Coding {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_date(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("valueDate") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_date_time(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("valueDateTime") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_decimal(&self) -> Option<f64> {
+        if let Some(val) = self.value.get("valueDecimal") {
+            return Some(val.as_f64().unwrap());
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_integer(&self) -> Option<f64> {
+        if let Some(val) = self.value.get("valueInteger") {
+            return Some(val.as_f64().unwrap());
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_quantity(&self) -> Option<Quantity> {
+        if let Some(val) = self.value.get("valueQuantity") {
+            return Some(Quantity {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
+    pub fn value_reference(&self) -> Option<Reference> {
+        if let Some(val) = self.value.get("valueReference") {
+            return Some(Reference {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -253,6 +282,17 @@ impl Contract_Answer<'_> {
     /// to be agreed to, e.g., the period of participation, the date of occupancy of a
     /// rental, warrently duration, or whether biospecimen may be used for further
     /// research.
+    pub fn value_time(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("valueTime") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Response to an offer clause or question text,  which enables selection of values
+    /// to be agreed to, e.g., the period of participation, the date of occupancy of a
+    /// rental, warrently duration, or whether biospecimen may be used for further
+    /// research.
     pub fn value_uri(&self) -> Option<&str> {
         if let Some(Value::String(string)) = self.value.get("valueUri") {
             return Some(string);
@@ -261,61 +301,228 @@ impl Contract_Answer<'_> {
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self._value_uri() {
-            _val.validate();
-        }
-        if let Some(_val) = self.value_boolean() {}
-        if let Some(_val) = self.value_date_time() {}
-        if let Some(_val) = self._value_time() {
-            _val.validate();
-        }
-        if let Some(_val) = self._value_integer() {
-            _val.validate();
-        }
-        if let Some(_val) = self.value_reference() {
-            _val.validate();
-        }
         if let Some(_val) = self._value_boolean() {
-            _val.validate();
-        }
-        if let Some(_val) = self.value_quantity() {
-            _val.validate();
-        }
-        if let Some(_val) = self._value_decimal() {
-            _val.validate();
-        }
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._value_date() {
-            _val.validate();
-        }
-        if let Some(_val) = self._value_string() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._value_date_time() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value_decimal() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value_integer() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value_string() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value_time() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value_uri() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.value_attachment() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self.value_boolean() {}
         if let Some(_val) = self.value_coding() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.value_integer() {}
-        if let Some(_val) = self.value_decimal() {}
         if let Some(_val) = self.value_date() {}
-        if let Some(_val) = self.value_time() {}
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self.value_date_time() {}
+        if let Some(_val) = self.value_decimal() {}
+        if let Some(_val) = self.value_integer() {}
+        if let Some(_val) = self.value_quantity() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.value_reference() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.value_string() {}
+        if let Some(_val) = self.value_time() {}
         if let Some(_val) = self.value_uri() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct Contract_AnswerBuilder {
+    pub(crate) value: Value,
+}
+
+impl Contract_AnswerBuilder {
+    pub fn build(&self) -> Contract_Answer {
+        Contract_Answer {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: Contract_Answer) -> Contract_AnswerBuilder {
+        Contract_AnswerBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> Contract_AnswerBuilder {
+        let mut __value: Value = json!({});
+        return Contract_AnswerBuilder { value: __value };
+    }
+
+    pub fn _value_boolean<'a>(&'a mut self, val: Element) -> &'a mut Contract_AnswerBuilder {
+        self.value["_valueBoolean"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_date<'a>(&'a mut self, val: Element) -> &'a mut Contract_AnswerBuilder {
+        self.value["_valueDate"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_date_time<'a>(&'a mut self, val: Element) -> &'a mut Contract_AnswerBuilder {
+        self.value["_valueDateTime"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_decimal<'a>(&'a mut self, val: Element) -> &'a mut Contract_AnswerBuilder {
+        self.value["_valueDecimal"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_integer<'a>(&'a mut self, val: Element) -> &'a mut Contract_AnswerBuilder {
+        self.value["_valueInteger"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_string<'a>(&'a mut self, val: Element) -> &'a mut Contract_AnswerBuilder {
+        self.value["_valueString"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_time<'a>(&'a mut self, val: Element) -> &'a mut Contract_AnswerBuilder {
+        self.value["_valueTime"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_uri<'a>(&'a mut self, val: Element) -> &'a mut Contract_AnswerBuilder {
+        self.value["_valueUri"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut Contract_AnswerBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut Contract_AnswerBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Contract_AnswerBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn value_attachment<'a>(&'a mut self, val: Attachment) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueAttachment"] = json!(val.value);
+        return self;
+    }
+
+    pub fn value_boolean<'a>(&'a mut self, val: bool) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueBoolean"] = json!(val);
+        return self;
+    }
+
+    pub fn value_coding<'a>(&'a mut self, val: Coding) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueCoding"] = json!(val.value);
+        return self;
+    }
+
+    pub fn value_date<'a>(&'a mut self, val: &str) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueDate"] = json!(val);
+        return self;
+    }
+
+    pub fn value_date_time<'a>(&'a mut self, val: &str) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueDateTime"] = json!(val);
+        return self;
+    }
+
+    pub fn value_decimal<'a>(&'a mut self, val: f64) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueDecimal"] = json!(val);
+        return self;
+    }
+
+    pub fn value_integer<'a>(&'a mut self, val: f64) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueInteger"] = json!(val);
+        return self;
+    }
+
+    pub fn value_quantity<'a>(&'a mut self, val: Quantity) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueQuantity"] = json!(val.value);
+        return self;
+    }
+
+    pub fn value_reference<'a>(&'a mut self, val: Reference) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueReference"] = json!(val.value);
+        return self;
+    }
+
+    pub fn value_string<'a>(&'a mut self, val: &str) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueString"] = json!(val);
+        return self;
+    }
+
+    pub fn value_time<'a>(&'a mut self, val: &str) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueTime"] = json!(val);
+        return self;
+    }
+
+    pub fn value_uri<'a>(&'a mut self, val: &str) -> &'a mut Contract_AnswerBuilder {
+        self.value["valueUri"] = json!(val);
+        return self;
     }
 }

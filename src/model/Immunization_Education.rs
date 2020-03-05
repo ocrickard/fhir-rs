@@ -2,21 +2,35 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Describes the event of a patient being administered a vaccine or a record of an
 /// immunization as reported by a patient, a clinician or another party.
 
 #[derive(Debug)]
 pub struct Immunization_Education<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl Immunization_Education<'_> {
-    /// Date the educational material was published.
-    pub fn publication_date(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("publicationDate") {
-            return Some(string);
+    pub fn new(value: &Value) -> Immunization_Education {
+        Immunization_Education {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for documentType
+    pub fn _document_type(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_documentType") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -24,23 +38,9 @@ impl Immunization_Education<'_> {
     /// Extensions for presentationDate
     pub fn _presentation_date(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_presentationDate") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Date the educational material was given to the patient.
-    pub fn presentation_date(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("presentationDate") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for documentType
-    pub fn _document_type(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_documentType") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -48,7 +48,27 @@ impl Immunization_Education<'_> {
     /// Extensions for publicationDate
     pub fn _publication_date(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_publicationDate") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for reference
+    pub fn _reference(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_reference") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Identifier of the material presented to the patient.
+    pub fn document_type(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("documentType") {
+            return Some(string);
         }
         return None;
     }
@@ -62,33 +82,19 @@ impl Immunization_Education<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Identifier of the material presented to the patient.
-    pub fn document_type(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("documentType") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for reference
-    pub fn _reference(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_reference") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Reference pointer to the educational material given to the patient if the
-    /// information was on line.
-    pub fn reference(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("reference") {
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
         }
         return None;
@@ -109,50 +115,168 @@ impl Immunization_Education<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
+    /// Date the educational material was given to the patient.
+    pub fn presentation_date(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("presentationDate") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Date the educational material was published.
+    pub fn publication_date(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("publicationDate") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Reference pointer to the educational material given to the patient if the
+    /// information was on line.
+    pub fn reference(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("reference") {
             return Some(string);
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.publication_date() {}
-        if let Some(_val) = self._presentation_date() {
-            _val.validate();
-        }
-        if let Some(_val) = self.presentation_date() {}
         if let Some(_val) = self._document_type() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._presentation_date() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._publication_date() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self._reference() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.document_type() {}
-        if let Some(_val) = self._reference() {
-            _val.validate();
-        }
-        if let Some(_val) = self.reference() {}
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.presentation_date() {}
+        if let Some(_val) = self.publication_date() {}
+        if let Some(_val) = self.reference() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct Immunization_EducationBuilder {
+    pub(crate) value: Value,
+}
+
+impl Immunization_EducationBuilder {
+    pub fn build(&self) -> Immunization_Education {
+        Immunization_Education {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: Immunization_Education) -> Immunization_EducationBuilder {
+        Immunization_EducationBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> Immunization_EducationBuilder {
+        let mut __value: Value = json!({});
+        return Immunization_EducationBuilder { value: __value };
+    }
+
+    pub fn _document_type<'a>(&'a mut self, val: Element) -> &'a mut Immunization_EducationBuilder {
+        self.value["_documentType"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _presentation_date<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut Immunization_EducationBuilder {
+        self.value["_presentationDate"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _publication_date<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut Immunization_EducationBuilder {
+        self.value["_publicationDate"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _reference<'a>(&'a mut self, val: Element) -> &'a mut Immunization_EducationBuilder {
+        self.value["_reference"] = json!(val.value);
+        return self;
+    }
+
+    pub fn document_type<'a>(&'a mut self, val: &str) -> &'a mut Immunization_EducationBuilder {
+        self.value["documentType"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Immunization_EducationBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut Immunization_EducationBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Immunization_EducationBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn presentation_date<'a>(&'a mut self, val: &str) -> &'a mut Immunization_EducationBuilder {
+        self.value["presentationDate"] = json!(val);
+        return self;
+    }
+
+    pub fn publication_date<'a>(&'a mut self, val: &str) -> &'a mut Immunization_EducationBuilder {
+        self.value["publicationDate"] = json!(val);
+        return self;
+    }
+
+    pub fn reference<'a>(&'a mut self, val: &str) -> &'a mut Immunization_EducationBuilder {
+        self.value["reference"] = json!(val);
+        return self;
     }
 }

@@ -2,30 +2,26 @@
 
 use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Information about a medication that is used to support knowledge.
 
 #[derive(Debug)]
 pub struct MedicationKnowledge_Schedule<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl MedicationKnowledge_Schedule<'_> {
-    /// Specifies the specific drug schedule.
-    pub fn schedule(&self) -> CodeableConcept {
-        CodeableConcept {
-            value: &self.value["schedule"],
+    pub fn new(value: &Value) -> MedicationKnowledge_Schedule {
+        MedicationKnowledge_Schedule {
+            value: Cow::Borrowed(value),
         }
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
     /// May be used to represent additional information that is not part of the basic
@@ -37,9 +33,20 @@ impl MedicationKnowledge_Schedule<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -59,26 +66,84 @@ impl MedicationKnowledge_Schedule<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    pub fn validate(&self) -> bool {
-        let _ = self.schedule().validate();
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+    /// Specifies the specific drug schedule.
+    pub fn schedule(&self) -> CodeableConcept {
+        CodeableConcept {
+            value: Cow::Borrowed(&self.value["schedule"]),
         }
+    }
+
+    pub fn validate(&self) -> bool {
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if !self.schedule().validate() {
+            return false;
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct MedicationKnowledge_ScheduleBuilder {
+    pub(crate) value: Value,
+}
+
+impl MedicationKnowledge_ScheduleBuilder {
+    pub fn build(&self) -> MedicationKnowledge_Schedule {
+        MedicationKnowledge_Schedule {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: MedicationKnowledge_Schedule) -> MedicationKnowledge_ScheduleBuilder {
+        MedicationKnowledge_ScheduleBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(schedule: CodeableConcept) -> MedicationKnowledge_ScheduleBuilder {
+        let mut __value: Value = json!({});
+        __value["schedule"] = json!(schedule.value);
+        return MedicationKnowledge_ScheduleBuilder { value: __value };
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicationKnowledge_ScheduleBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut MedicationKnowledge_ScheduleBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicationKnowledge_ScheduleBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

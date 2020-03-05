@@ -4,38 +4,66 @@ use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::Money::Money;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Invoice containing collected ChargeItems from an Account with calculated
 /// individual and total price for Billing purpose.
 
 #[derive(Debug)]
 pub struct Invoice_PriceComponent<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl Invoice_PriceComponent<'_> {
-    /// Extensions for type
-    pub fn _type(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_type") {
-            return Some(Element { value: val });
+    pub fn new(value: &Value) -> Invoice_PriceComponent {
+        Invoice_PriceComponent {
+            value: Cow::Borrowed(value),
         }
-        return None;
     }
 
-    /// The factor that has been applied on the base price for calculating this
-    /// component.
-    pub fn factor(&self) -> Option<f64> {
-        if let Some(val) = self.value.get("factor") {
-            return Some(val.as_f64().unwrap());
-        }
-        return None;
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
     /// Extensions for factor
     pub fn _factor(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_factor") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for type
+    pub fn _type(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_type") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// The amount calculated for this component.
+    pub fn amount(&self) -> Option<Money> {
+        if let Some(val) = self.value.get("amount") {
+            return Some(Money {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// A code that identifies the component. Codes may be used to differentiate between
+    /// kinds of taxes, surcharges, discounts etc.
+    pub fn code(&self) -> Option<CodeableConcept> {
+        if let Some(val) = self.value.get("code") {
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -49,34 +77,20 @@ impl Invoice_PriceComponent<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// The amount calculated for this component.
-    pub fn amount(&self) -> Option<Money> {
-        if let Some(val) = self.value.get("amount") {
-            return Some(Money { value: val });
-        }
-        return None;
-    }
-
-    /// This code identifies the type of the component.
-    pub fn fhir_type(&self) -> Option<Invoice_PriceComponentType> {
-        if let Some(Value::String(val)) = self.value.get("type") {
-            return Some(Invoice_PriceComponentType::from_string(&val).unwrap());
-        }
-        return None;
-    }
-
-    /// A code that identifies the component. Codes may be used to differentiate between
-    /// kinds of taxes, surcharges, discounts etc.
-    pub fn code(&self) -> Option<CodeableConcept> {
-        if let Some(val) = self.value.get("code") {
-            return Some(CodeableConcept { value: val });
+    /// The factor that has been applied on the base price for calculating this
+    /// component.
+    pub fn factor(&self) -> Option<f64> {
+        if let Some(val) = self.value.get("factor") {
+            return Some(val.as_f64().unwrap());
         }
         return None;
     }
@@ -105,40 +119,137 @@ impl Invoice_PriceComponent<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
+    /// This code identifies the type of the component.
+    pub fn fhir_type(&self) -> Option<Invoice_PriceComponentType> {
+        if let Some(Value::String(val)) = self.value.get("type") {
+            return Some(Invoice_PriceComponentType::from_string(&val).unwrap());
+        }
+        return None;
+    }
+
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self._type() {
-            _val.validate();
-        }
-        if let Some(_val) = self.factor() {}
         if let Some(_val) = self._factor() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self._type() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.amount() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.fhir_type() {}
         if let Some(_val) = self.code() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.factor() {}
         if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.fhir_type() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct Invoice_PriceComponentBuilder {
+    pub(crate) value: Value,
+}
+
+impl Invoice_PriceComponentBuilder {
+    pub fn build(&self) -> Invoice_PriceComponent {
+        Invoice_PriceComponent {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: Invoice_PriceComponent) -> Invoice_PriceComponentBuilder {
+        Invoice_PriceComponentBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> Invoice_PriceComponentBuilder {
+        let mut __value: Value = json!({});
+        return Invoice_PriceComponentBuilder { value: __value };
+    }
+
+    pub fn _factor<'a>(&'a mut self, val: Element) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["_factor"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _type<'a>(&'a mut self, val: Element) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["_type"] = json!(val.value);
+        return self;
+    }
+
+    pub fn amount<'a>(&'a mut self, val: Money) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["amount"] = json!(val.value);
+        return self;
+    }
+
+    pub fn code<'a>(&'a mut self, val: CodeableConcept) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["code"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn factor<'a>(&'a mut self, val: f64) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["factor"] = json!(val);
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn fhir_type<'a>(
+        &'a mut self,
+        val: Invoice_PriceComponentType,
+    ) -> &'a mut Invoice_PriceComponentBuilder {
+        self.value["type"] = json!(val.to_string());
+        return self;
     }
 }
 
@@ -162,6 +273,17 @@ impl Invoice_PriceComponentType {
             "tax" => Some(Invoice_PriceComponentType::Tax),
             "informational" => Some(Invoice_PriceComponentType::Informational),
             _ => None,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Invoice_PriceComponentType::Base => "base".to_string(),
+            Invoice_PriceComponentType::Surcharge => "surcharge".to_string(),
+            Invoice_PriceComponentType::Deduction => "deduction".to_string(),
+            Invoice_PriceComponentType::Discount => "discount".to_string(),
+            Invoice_PriceComponentType::Tax => "tax".to_string(),
+            Invoice_PriceComponentType::Informational => "informational".to_string(),
         }
     }
 }

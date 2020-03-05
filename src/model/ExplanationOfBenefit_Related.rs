@@ -4,7 +4,9 @@ use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Extension::Extension;
 use crate::model::Identifier::Identifier;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// This resource provides: the claim details; adjudication details from the
 /// processing of a Claim; and optionally account balance information, for informing
@@ -12,23 +14,26 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct ExplanationOfBenefit_Related<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl ExplanationOfBenefit_Related<'_> {
+    pub fn new(value: &Value) -> ExplanationOfBenefit_Related {
+        ExplanationOfBenefit_Related {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
     /// Reference to a related claim.
     pub fn claim(&self) -> Option<Reference> {
         if let Some(val) = self.value.get("claim") {
-            return Some(Reference { value: val });
-        }
-        return None;
-    }
-
-    /// An alternate organizational reference to the case or file to which this
-    /// particular claim pertains.
-    pub fn reference(&self) -> Option<Identifier> {
-        if let Some(val) = self.value.get("reference") {
-            return Some(Identifier { value: val });
+            return Some(Reference {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -42,7 +47,9 @@ impl ExplanationOfBenefit_Related<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -54,14 +61,6 @@ impl ExplanationOfBenefit_Related<'_> {
     pub fn id(&self) -> Option<&str> {
         if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
-        }
-        return None;
-    }
-
-    /// A code to convey how the claims are related.
-    pub fn relationship(&self) -> Option<CodeableConcept> {
-        if let Some(val) = self.value.get("relationship") {
-            return Some(CodeableConcept { value: val });
         }
         return None;
     }
@@ -81,34 +80,130 @@ impl ExplanationOfBenefit_Related<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
+    /// An alternate organizational reference to the case or file to which this
+    /// particular claim pertains.
+    pub fn reference(&self) -> Option<Identifier> {
+        if let Some(val) = self.value.get("reference") {
+            return Some(Identifier {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// A code to convey how the claims are related.
+    pub fn relationship(&self) -> Option<CodeableConcept> {
+        if let Some(val) = self.value.get("relationship") {
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
     pub fn validate(&self) -> bool {
         if let Some(_val) = self.claim() {
-            _val.validate();
-        }
-        if let Some(_val) = self.reference() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
-        if let Some(_val) = self.relationship() {
-            _val.validate();
-        }
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.reference() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.relationship() {
+            if !_val.validate() {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct ExplanationOfBenefit_RelatedBuilder {
+    pub(crate) value: Value,
+}
+
+impl ExplanationOfBenefit_RelatedBuilder {
+    pub fn build(&self) -> ExplanationOfBenefit_Related {
+        ExplanationOfBenefit_Related {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: ExplanationOfBenefit_Related) -> ExplanationOfBenefit_RelatedBuilder {
+        ExplanationOfBenefit_RelatedBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> ExplanationOfBenefit_RelatedBuilder {
+        let mut __value: Value = json!({});
+        return ExplanationOfBenefit_RelatedBuilder { value: __value };
+    }
+
+    pub fn claim<'a>(&'a mut self, val: Reference) -> &'a mut ExplanationOfBenefit_RelatedBuilder {
+        self.value["claim"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ExplanationOfBenefit_RelatedBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut ExplanationOfBenefit_RelatedBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ExplanationOfBenefit_RelatedBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn reference<'a>(
+        &'a mut self,
+        val: Identifier,
+    ) -> &'a mut ExplanationOfBenefit_RelatedBuilder {
+        self.value["reference"] = json!(val.value);
+        return self;
+    }
+
+    pub fn relationship<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut ExplanationOfBenefit_RelatedBuilder {
+        self.value["relationship"] = json!(val.value);
+        return self;
     }
 }

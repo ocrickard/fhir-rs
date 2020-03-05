@@ -3,7 +3,9 @@
 use crate::model::AdverseEvent_Causality::AdverseEvent_Causality;
 use crate::model::Extension::Extension;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Actual or  potential/avoided event causing unintended physical injury resulting
 /// from or contributed to by medical care, a research study or other healthcare
@@ -12,17 +14,18 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct AdverseEvent_SuspectEntity<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl AdverseEvent_SuspectEntity<'_> {
-    /// Identifies the actual instance of what caused the adverse event.  May be a
-    /// substance, medication, medication administration, medication statement or a
-    /// device.
-    pub fn instance(&self) -> Reference {
-        Reference {
-            value: &self.value["instance"],
+    pub fn new(value: &Value) -> AdverseEvent_SuspectEntity {
+        AdverseEvent_SuspectEntity {
+            value: Cow::Borrowed(value),
         }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
     /// Information on the possible cause of the event.
@@ -30,7 +33,9 @@ impl AdverseEvent_SuspectEntity<'_> {
         if let Some(Value::Array(val)) = self.value.get("causality") {
             return Some(
                 val.into_iter()
-                    .map(|e| AdverseEvent_Causality { value: e })
+                    .map(|e| AdverseEvent_Causality {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -46,11 +51,31 @@ impl AdverseEvent_SuspectEntity<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Identifies the actual instance of what caused the adverse event.  May be a
+    /// substance, medication, medication administration, medication statement or a
+    /// device.
+    pub fn instance(&self) -> Reference {
+        Reference {
+            value: Cow::Borrowed(&self.value["instance"]),
+        }
     }
 
     /// May be used to represent additional information that is not part of the basic
@@ -68,40 +93,90 @@ impl AdverseEvent_SuspectEntity<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
-    }
-
     pub fn validate(&self) -> bool {
-        let _ = self.instance().validate();
         if let Some(_val) = self.causality() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
+        if !self.instance().validate() {
+            return false;
+        }
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct AdverseEvent_SuspectEntityBuilder {
+    pub(crate) value: Value,
+}
+
+impl AdverseEvent_SuspectEntityBuilder {
+    pub fn build(&self) -> AdverseEvent_SuspectEntity {
+        AdverseEvent_SuspectEntity {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: AdverseEvent_SuspectEntity) -> AdverseEvent_SuspectEntityBuilder {
+        AdverseEvent_SuspectEntityBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(instance: Reference) -> AdverseEvent_SuspectEntityBuilder {
+        let mut __value: Value = json!({});
+        __value["instance"] = json!(instance.value);
+        return AdverseEvent_SuspectEntityBuilder { value: __value };
+    }
+
+    pub fn causality<'a>(
+        &'a mut self,
+        val: Vec<AdverseEvent_Causality>,
+    ) -> &'a mut AdverseEvent_SuspectEntityBuilder {
+        self.value["causality"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut AdverseEvent_SuspectEntityBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut AdverseEvent_SuspectEntityBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut AdverseEvent_SuspectEntityBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

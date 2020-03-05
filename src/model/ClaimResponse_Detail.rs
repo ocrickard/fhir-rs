@@ -4,17 +4,53 @@ use crate::model::ClaimResponse_Adjudication::ClaimResponse_Adjudication;
 use crate::model::ClaimResponse_SubDetail::ClaimResponse_SubDetail;
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// This resource provides the adjudication details from the processing of a Claim
 /// resource.
 
 #[derive(Debug)]
 pub struct ClaimResponse_Detail<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl ClaimResponse_Detail<'_> {
+    pub fn new(value: &Value) -> ClaimResponse_Detail {
+        ClaimResponse_Detail {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for detailSequence
+    pub fn _detail_sequence(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_detailSequence") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for noteNumber
+    pub fn _note_number(&self) -> Option<Vec<Element>> {
+        if let Some(Value::Array(val)) = self.value.get("_noteNumber") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Element {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
     /// The adjudication results.
     pub fn adjudication(&self) -> Vec<ClaimResponse_Adjudication> {
         self.value
@@ -23,18 +59,16 @@ impl ClaimResponse_Detail<'_> {
             .as_array()
             .unwrap()
             .into_iter()
-            .map(|e| ClaimResponse_Adjudication { value: e })
+            .map(|e| ClaimResponse_Adjudication {
+                value: Cow::Borrowed(e),
+            })
             .collect::<Vec<_>>()
     }
 
-    /// Extensions for noteNumber
-    pub fn _note_number(&self) -> Option<Vec<Element>> {
-        if let Some(Value::Array(val)) = self.value.get("_noteNumber") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Element { value: e })
-                    .collect::<Vec<_>>(),
-            );
+    /// A number to uniquely reference the claim detail entry.
+    pub fn detail_sequence(&self) -> Option<i64> {
+        if let Some(val) = self.value.get("detailSequence") {
+            return Some(val.as_i64().unwrap());
         }
         return None;
     }
@@ -48,20 +82,9 @@ impl ClaimResponse_Detail<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// The numbers associated with notes below which apply to the adjudication of this
-    /// item.
-    pub fn note_number(&self) -> Option<Vec<i64>> {
-        if let Some(Value::Array(val)) = self.value.get("noteNumber") {
-            return Some(
-                val.into_iter()
-                    .map(|e| e.as_i64().unwrap())
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -73,18 +96,6 @@ impl ClaimResponse_Detail<'_> {
     pub fn id(&self) -> Option<&str> {
         if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
-        }
-        return None;
-    }
-
-    /// A sub-detail adjudication of a simple product or service.
-    pub fn sub_detail(&self) -> Option<Vec<ClaimResponse_SubDetail>> {
-        if let Some(Value::Array(val)) = self.value.get("subDetail") {
-            return Some(
-                val.into_iter()
-                    .map(|e| ClaimResponse_SubDetail { value: e })
-                    .collect::<Vec<_>>(),
-            );
         }
         return None;
     }
@@ -104,61 +115,159 @@ impl ClaimResponse_Detail<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for detailSequence
-    pub fn _detail_sequence(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_detailSequence") {
-            return Some(Element { value: val });
+    /// The numbers associated with notes below which apply to the adjudication of this
+    /// item.
+    pub fn note_number(&self) -> Option<Vec<i64>> {
+        if let Some(Value::Array(val)) = self.value.get("noteNumber") {
+            return Some(
+                val.into_iter()
+                    .map(|e| e.as_i64().unwrap())
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
 
-    /// A number to uniquely reference the claim detail entry.
-    pub fn detail_sequence(&self) -> Option<i64> {
-        if let Some(val) = self.value.get("detailSequence") {
-            return Some(val.as_i64().unwrap());
+    /// A sub-detail adjudication of a simple product or service.
+    pub fn sub_detail(&self) -> Option<Vec<ClaimResponse_SubDetail>> {
+        if let Some(Value::Array(val)) = self.value.get("subDetail") {
+            return Some(
+                val.into_iter()
+                    .map(|e| ClaimResponse_SubDetail {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        let _ = self.adjudication().into_iter().for_each(|e| {
-            e.validate();
-        });
-        if let Some(_val) = self._note_number() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self._detail_sequence() {
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self._note_number() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if !self
+            .adjudication()
+            .into_iter()
+            .map(|e| e.validate())
+            .all(|x| x == true)
+        {
+            return false;
+        }
+        if let Some(_val) = self.detail_sequence() {}
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.note_number() {
             _val.into_iter().for_each(|_e| {});
         }
-        if let Some(_val) = self.id() {}
         if let Some(_val) = self.sub_detail() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self._detail_sequence() {
-            _val.validate();
-        }
-        if let Some(_val) = self.detail_sequence() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct ClaimResponse_DetailBuilder {
+    pub(crate) value: Value,
+}
+
+impl ClaimResponse_DetailBuilder {
+    pub fn build(&self) -> ClaimResponse_Detail {
+        ClaimResponse_Detail {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: ClaimResponse_Detail) -> ClaimResponse_DetailBuilder {
+        ClaimResponse_DetailBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(adjudication: Vec<ClaimResponse_Adjudication>) -> ClaimResponse_DetailBuilder {
+        let mut __value: Value = json!({});
+        __value["adjudication"] = json!(adjudication
+            .into_iter()
+            .map(|e| e.value)
+            .collect::<Vec<_>>());
+        return ClaimResponse_DetailBuilder { value: __value };
+    }
+
+    pub fn _detail_sequence<'a>(&'a mut self, val: Element) -> &'a mut ClaimResponse_DetailBuilder {
+        self.value["_detailSequence"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _note_number<'a>(
+        &'a mut self,
+        val: Vec<Element>,
+    ) -> &'a mut ClaimResponse_DetailBuilder {
+        self.value["_noteNumber"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn detail_sequence<'a>(&'a mut self, val: i64) -> &'a mut ClaimResponse_DetailBuilder {
+        self.value["detailSequence"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut ClaimResponse_DetailBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut ClaimResponse_DetailBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ClaimResponse_DetailBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn note_number<'a>(&'a mut self, val: Vec<i64>) -> &'a mut ClaimResponse_DetailBuilder {
+        self.value["noteNumber"] = json!(val);
+        return self;
+    }
+
+    pub fn sub_detail<'a>(
+        &'a mut self,
+        val: Vec<ClaimResponse_SubDetail>,
+    ) -> &'a mut ClaimResponse_DetailBuilder {
+        self.value["subDetail"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

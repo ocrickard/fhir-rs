@@ -3,17 +3,57 @@
 use crate::model::Coding::Coding;
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A structured set of tests against a FHIR server or client implementation to
 /// determine compliance against the FHIR specification.
 
 #[derive(Debug)]
 pub struct TestScript_Destination<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl TestScript_Destination<'_> {
+    pub fn new(value: &Value) -> TestScript_Destination {
+        TestScript_Destination {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for index
+    pub fn _index(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_index") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// May be used to represent additional information that is not part of the basic
+    /// definition of the element. To make the use of extensions safe and manageable,
+    /// there is a strict set of governance  applied to the definition and use of
+    /// extensions. Though any implementer can define an extension, there is a set of
+    /// requirements that SHALL be met as part of the definition of the extension.
+    pub fn extension(&self) -> Option<Vec<Extension>> {
+        if let Some(Value::Array(val)) = self.value.get("extension") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
     /// Unique id for the element within a resource (for internal references). This may
     /// be any string value that does not contain spaces.
     pub fn id(&self) -> Option<&str> {
@@ -28,30 +68,6 @@ impl TestScript_Destination<'_> {
     pub fn index(&self) -> Option<i64> {
         if let Some(val) = self.value.get("index") {
             return Some(val.as_i64().unwrap());
-        }
-        return None;
-    }
-
-    /// Extensions for index
-    pub fn _index(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_index") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// May be used to represent additional information that is not part of the basic
-    /// definition of the element. To make the use of extensions safe and manageable,
-    /// there is a strict set of governance  applied to the definition and use of
-    /// extensions. Though any implementer can define an extension, there is a set of
-    /// requirements that SHALL be met as part of the definition of the extension.
-    pub fn extension(&self) -> Option<Vec<Extension>> {
-        if let Some(Value::Array(val)) = self.value.get("extension") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Extension { value: e })
-                    .collect::<Vec<_>>(),
-            );
         }
         return None;
     }
@@ -71,7 +87,9 @@ impl TestScript_Destination<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -81,27 +99,88 @@ impl TestScript_Destination<'_> {
     /// The type of destination profile the test system supports.
     pub fn profile(&self) -> Coding {
         Coding {
-            value: &self.value["profile"],
+            value: Cow::Borrowed(&self.value["profile"]),
         }
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.index() {}
         if let Some(_val) = self._index() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.index() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        let _ = self.profile().validate();
+        if !self.profile().validate() {
+            return false;
+        }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct TestScript_DestinationBuilder {
+    pub(crate) value: Value,
+}
+
+impl TestScript_DestinationBuilder {
+    pub fn build(&self) -> TestScript_Destination {
+        TestScript_Destination {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: TestScript_Destination) -> TestScript_DestinationBuilder {
+        TestScript_DestinationBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(profile: Coding) -> TestScript_DestinationBuilder {
+        let mut __value: Value = json!({});
+        __value["profile"] = json!(profile.value);
+        return TestScript_DestinationBuilder { value: __value };
+    }
+
+    pub fn _index<'a>(&'a mut self, val: Element) -> &'a mut TestScript_DestinationBuilder {
+        self.value["_index"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut TestScript_DestinationBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut TestScript_DestinationBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn index<'a>(&'a mut self, val: i64) -> &'a mut TestScript_DestinationBuilder {
+        self.value["index"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut TestScript_DestinationBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

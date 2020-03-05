@@ -4,7 +4,9 @@ use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::Period::Period;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A material substance originating from a biological entity intended to be
 /// transplanted or infused
@@ -12,15 +14,34 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct BiologicallyDerivedProduct_Collection<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl BiologicallyDerivedProduct_Collection<'_> {
-    /// The patient or entity, such as a hospital or vendor in the case of a
-    /// processed/manipulated/manufactured product, providing the product.
-    pub fn source(&self) -> Option<Reference> {
-        if let Some(val) = self.value.get("source") {
-            return Some(Reference { value: val });
+    pub fn new(value: &Value) -> BiologicallyDerivedProduct_Collection {
+        BiologicallyDerivedProduct_Collection {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for collectedDateTime
+    pub fn _collected_date_time(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_collectedDateTime") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Time of product collection.
+    pub fn collected_date_time(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("collectedDateTime") {
+            return Some(string);
         }
         return None;
     }
@@ -28,7 +49,19 @@ impl BiologicallyDerivedProduct_Collection<'_> {
     /// Time of product collection.
     pub fn collected_period(&self) -> Option<Period> {
         if let Some(val) = self.value.get("collectedPeriod") {
-            return Some(Period { value: val });
+            return Some(Period {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Healthcare professional who is performing the collection.
+    pub fn collector(&self) -> Option<Reference> {
+        if let Some(val) = self.value.get("collector") {
+            return Some(Reference {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -42,7 +75,9 @@ impl BiologicallyDerivedProduct_Collection<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -54,14 +89,6 @@ impl BiologicallyDerivedProduct_Collection<'_> {
     pub fn id(&self) -> Option<&str> {
         if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for collectedDateTime
-    pub fn _collected_date_time(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_collectedDateTime") {
-            return Some(Element { value: val });
         }
         return None;
     }
@@ -81,54 +108,147 @@ impl BiologicallyDerivedProduct_Collection<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Healthcare professional who is performing the collection.
-    pub fn collector(&self) -> Option<Reference> {
-        if let Some(val) = self.value.get("collector") {
-            return Some(Reference { value: val });
-        }
-        return None;
-    }
-
-    /// Time of product collection.
-    pub fn collected_date_time(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("collectedDateTime") {
-            return Some(string);
+    /// The patient or entity, such as a hospital or vendor in the case of a
+    /// processed/manipulated/manufactured product, providing the product.
+    pub fn source(&self) -> Option<Reference> {
+        if let Some(val) = self.value.get("source") {
+            return Some(Reference {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.source() {
-            _val.validate();
-        }
-        if let Some(_val) = self.collected_period() {
-            _val.validate();
-        }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.id() {}
         if let Some(_val) = self._collected_date_time() {
-            _val.validate();
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.collector() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.collected_date_time() {}
+        if let Some(_val) = self.collected_period() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.collector() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.source() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct BiologicallyDerivedProduct_CollectionBuilder {
+    pub(crate) value: Value,
+}
+
+impl BiologicallyDerivedProduct_CollectionBuilder {
+    pub fn build(&self) -> BiologicallyDerivedProduct_Collection {
+        BiologicallyDerivedProduct_Collection {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(
+        existing: BiologicallyDerivedProduct_Collection,
+    ) -> BiologicallyDerivedProduct_CollectionBuilder {
+        BiologicallyDerivedProduct_CollectionBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> BiologicallyDerivedProduct_CollectionBuilder {
+        let mut __value: Value = json!({});
+        return BiologicallyDerivedProduct_CollectionBuilder { value: __value };
+    }
+
+    pub fn _collected_date_time<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut BiologicallyDerivedProduct_CollectionBuilder {
+        self.value["_collectedDateTime"] = json!(val.value);
+        return self;
+    }
+
+    pub fn collected_date_time<'a>(
+        &'a mut self,
+        val: &str,
+    ) -> &'a mut BiologicallyDerivedProduct_CollectionBuilder {
+        self.value["collectedDateTime"] = json!(val);
+        return self;
+    }
+
+    pub fn collected_period<'a>(
+        &'a mut self,
+        val: Period,
+    ) -> &'a mut BiologicallyDerivedProduct_CollectionBuilder {
+        self.value["collectedPeriod"] = json!(val.value);
+        return self;
+    }
+
+    pub fn collector<'a>(
+        &'a mut self,
+        val: Reference,
+    ) -> &'a mut BiologicallyDerivedProduct_CollectionBuilder {
+        self.value["collector"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut BiologicallyDerivedProduct_CollectionBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut BiologicallyDerivedProduct_CollectionBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut BiologicallyDerivedProduct_CollectionBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn source<'a>(
+        &'a mut self,
+        val: Reference,
+    ) -> &'a mut BiologicallyDerivedProduct_CollectionBuilder {
+        self.value["source"] = json!(val.value);
+        return self;
     }
 }

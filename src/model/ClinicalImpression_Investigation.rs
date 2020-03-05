@@ -3,7 +3,9 @@
 use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Extension::Extension;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A record of a clinical assessment performed to determine what problem(s) may
 /// affect the patient and before planning the treatments or management strategies
@@ -15,20 +17,28 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct ClinicalImpression_Investigation<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl ClinicalImpression_Investigation<'_> {
-    /// A record of a specific investigation that was undertaken.
-    pub fn item(&self) -> Option<Vec<Reference>> {
-        if let Some(Value::Array(val)) = self.value.get("item") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Reference { value: e })
-                    .collect::<Vec<_>>(),
-            );
+    pub fn new(value: &Value) -> ClinicalImpression_Investigation {
+        ClinicalImpression_Investigation {
+            value: Cow::Borrowed(value),
         }
-        return None;
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// A name/code for the group ("set") of investigations. Typically, this will be
+    /// something like "signs", "symptoms", "clinical", "diagnostic", but the list is
+    /// not constrained, and others such groups such as
+    /// (exposure|family|travel|nutritional) history may be used.
+    pub fn code(&self) -> CodeableConcept {
+        CodeableConcept {
+            value: Cow::Borrowed(&self.value["code"]),
+        }
     }
 
     /// May be used to represent additional information that is not part of the basic
@@ -40,7 +50,32 @@ impl ClinicalImpression_Investigation<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// A record of a specific investigation that was undertaken.
+    pub fn item(&self) -> Option<Vec<Reference>> {
+        if let Some(Value::Array(val)) = self.value.get("item") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Reference {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -62,50 +97,92 @@ impl ClinicalImpression_Investigation<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// A name/code for the group ("set") of investigations. Typically, this will be
-    /// something like "signs", "symptoms", "clinical", "diagnostic", but the list is
-    /// not constrained, and others such groups such as
-    /// (exposure|family|travel|nutritional) history may be used.
-    pub fn code(&self) -> CodeableConcept {
-        CodeableConcept {
-            value: &self.value["code"],
-        }
-    }
-
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.item() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if !self.code().validate() {
+            return false;
         }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
-        let _ = self.code().validate();
+        if let Some(_val) = self.item() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct ClinicalImpression_InvestigationBuilder {
+    pub(crate) value: Value,
+}
+
+impl ClinicalImpression_InvestigationBuilder {
+    pub fn build(&self) -> ClinicalImpression_Investigation {
+        ClinicalImpression_Investigation {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(
+        existing: ClinicalImpression_Investigation,
+    ) -> ClinicalImpression_InvestigationBuilder {
+        ClinicalImpression_InvestigationBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(code: CodeableConcept) -> ClinicalImpression_InvestigationBuilder {
+        let mut __value: Value = json!({});
+        __value["code"] = json!(code.value);
+        return ClinicalImpression_InvestigationBuilder { value: __value };
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ClinicalImpression_InvestigationBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut ClinicalImpression_InvestigationBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn item<'a>(
+        &'a mut self,
+        val: Vec<Reference>,
+    ) -> &'a mut ClinicalImpression_InvestigationBuilder {
+        self.value["item"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ClinicalImpression_InvestigationBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

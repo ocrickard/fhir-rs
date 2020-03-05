@@ -2,20 +2,34 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A Map of relationships between 2 structures that can be used to transform data.
 
 #[derive(Debug)]
 pub struct StructureMap_Input<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl StructureMap_Input<'_> {
+    pub fn new(value: &Value) -> StructureMap_Input {
+        StructureMap_Input {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
     /// Extensions for documentation
     pub fn _documentation(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_documentation") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -23,7 +37,37 @@ impl StructureMap_Input<'_> {
     /// Extensions for mode
     pub fn _mode(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_mode") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for name
+    pub fn _name(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_name") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for type
+    pub fn _type(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_type") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Documentation for this instance of data.
+    pub fn documentation(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("documentation") {
+            return Some(string);
         }
         return None;
     }
@@ -37,9 +81,20 @@ impl StructureMap_Input<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -48,30 +103,6 @@ impl StructureMap_Input<'_> {
     pub fn mode(&self) -> Option<StructureMap_InputMode> {
         if let Some(Value::String(val)) = self.value.get("mode") {
             return Some(StructureMap_InputMode::from_string(&val).unwrap());
-        }
-        return None;
-    }
-
-    /// Name for this instance of data.
-    pub fn name(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("name") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for type
-    pub fn _type(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_type") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Type for this instance of data.
-    pub fn fhir_type(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("type") {
-            return Some(string);
         }
         return None;
     }
@@ -91,33 +122,26 @@ impl StructureMap_Input<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for name
-    pub fn _name(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_name") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
+    /// Name for this instance of data.
+    pub fn name(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("name") {
             return Some(string);
         }
         return None;
     }
 
-    /// Documentation for this instance of data.
-    pub fn documentation(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("documentation") {
+    /// Type for this instance of data.
+    pub fn fhir_type(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("type") {
             return Some(string);
         }
         return None;
@@ -125,33 +149,127 @@ impl StructureMap_Input<'_> {
 
     pub fn validate(&self) -> bool {
         if let Some(_val) = self._documentation() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._mode() {
-            _val.validate();
-        }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.mode() {}
-        if let Some(_val) = self.name() {}
-        if let Some(_val) = self._type() {
-            _val.validate();
-        }
-        if let Some(_val) = self.fhir_type() {}
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._name() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._type() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.documentation() {}
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
-        if let Some(_val) = self.documentation() {}
+        if let Some(_val) = self.mode() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.name() {}
+        if let Some(_val) = self.fhir_type() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct StructureMap_InputBuilder {
+    pub(crate) value: Value,
+}
+
+impl StructureMap_InputBuilder {
+    pub fn build(&self) -> StructureMap_Input {
+        StructureMap_Input {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: StructureMap_Input) -> StructureMap_InputBuilder {
+        StructureMap_InputBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> StructureMap_InputBuilder {
+        let mut __value: Value = json!({});
+        return StructureMap_InputBuilder { value: __value };
+    }
+
+    pub fn _documentation<'a>(&'a mut self, val: Element) -> &'a mut StructureMap_InputBuilder {
+        self.value["_documentation"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _mode<'a>(&'a mut self, val: Element) -> &'a mut StructureMap_InputBuilder {
+        self.value["_mode"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _name<'a>(&'a mut self, val: Element) -> &'a mut StructureMap_InputBuilder {
+        self.value["_name"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _type<'a>(&'a mut self, val: Element) -> &'a mut StructureMap_InputBuilder {
+        self.value["_type"] = json!(val.value);
+        return self;
+    }
+
+    pub fn documentation<'a>(&'a mut self, val: &str) -> &'a mut StructureMap_InputBuilder {
+        self.value["documentation"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut StructureMap_InputBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut StructureMap_InputBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn mode<'a>(
+        &'a mut self,
+        val: StructureMap_InputMode,
+    ) -> &'a mut StructureMap_InputBuilder {
+        self.value["mode"] = json!(val.to_string());
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut StructureMap_InputBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn name<'a>(&'a mut self, val: &str) -> &'a mut StructureMap_InputBuilder {
+        self.value["name"] = json!(val);
+        return self;
+    }
+
+    pub fn fhir_type<'a>(&'a mut self, val: &str) -> &'a mut StructureMap_InputBuilder {
+        self.value["type"] = json!(val);
+        return self;
     }
 }
 
@@ -167,6 +285,13 @@ impl StructureMap_InputMode {
             "source" => Some(StructureMap_InputMode::Source),
             "target" => Some(StructureMap_InputMode::Target),
             _ => None,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            StructureMap_InputMode::Source => "source".to_string(),
+            StructureMap_InputMode::Target => "target".to_string(),
         }
     }
 }

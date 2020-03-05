@@ -3,21 +3,62 @@
 use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Extension::Extension;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Indication for the Medicinal Product.
 
 #[derive(Debug)]
 pub struct MedicinalProductIndication_OtherTherapy<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl MedicinalProductIndication_OtherTherapy<'_> {
+    pub fn new(value: &Value) -> MedicinalProductIndication_OtherTherapy {
+        MedicinalProductIndication_OtherTherapy {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// May be used to represent additional information that is not part of the basic
+    /// definition of the element. To make the use of extensions safe and manageable,
+    /// there is a strict set of governance  applied to the definition and use of
+    /// extensions. Though any implementer can define an extension, there is a set of
+    /// requirements that SHALL be met as part of the definition of the extension.
+    pub fn extension(&self) -> Option<Vec<Extension>> {
+        if let Some(Value::Array(val)) = self.value.get("extension") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
+    }
+
     /// Reference to a specific medication (active substance, medicinal product or class
     /// of products) as part of an indication or contraindication.
     pub fn medication_codeable_concept(&self) -> Option<CodeableConcept> {
         if let Some(val) = self.value.get("medicationCodeableConcept") {
-            return Some(CodeableConcept { value: val });
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -26,7 +67,9 @@ impl MedicinalProductIndication_OtherTherapy<'_> {
     /// of products) as part of an indication or contraindication.
     pub fn medication_reference(&self) -> Option<Reference> {
         if let Some(val) = self.value.get("medicationReference") {
-            return Some(Reference { value: val });
+            return Some(Reference {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -46,23 +89,9 @@ impl MedicinalProductIndication_OtherTherapy<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// May be used to represent additional information that is not part of the basic
-    /// definition of the element. To make the use of extensions safe and manageable,
-    /// there is a strict set of governance  applied to the definition and use of
-    /// extensions. Though any implementer can define an extension, there is a set of
-    /// requirements that SHALL be met as part of the definition of the extension.
-    pub fn extension(&self) -> Option<Vec<Extension>> {
-        if let Some(Value::Array(val)) = self.value.get("extension") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -73,38 +102,105 @@ impl MedicinalProductIndication_OtherTherapy<'_> {
     /// contraindication and another therapy.
     pub fn therapy_relationship_type(&self) -> CodeableConcept {
         CodeableConcept {
-            value: &self.value["therapyRelationshipType"],
+            value: Cow::Borrowed(&self.value["therapyRelationshipType"]),
         }
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
     }
 
     pub fn validate(&self) -> bool {
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
         if let Some(_val) = self.medication_codeable_concept() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.medication_reference() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if !self.therapy_relationship_type().validate() {
+            return false;
         }
-        let _ = self.therapy_relationship_type().validate();
-        if let Some(_val) = self.id() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct MedicinalProductIndication_OtherTherapyBuilder {
+    pub(crate) value: Value,
+}
+
+impl MedicinalProductIndication_OtherTherapyBuilder {
+    pub fn build(&self) -> MedicinalProductIndication_OtherTherapy {
+        MedicinalProductIndication_OtherTherapy {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(
+        existing: MedicinalProductIndication_OtherTherapy,
+    ) -> MedicinalProductIndication_OtherTherapyBuilder {
+        MedicinalProductIndication_OtherTherapyBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(
+        therapy_relationship_type: CodeableConcept,
+    ) -> MedicinalProductIndication_OtherTherapyBuilder {
+        let mut __value: Value = json!({});
+        __value["therapyRelationshipType"] = json!(therapy_relationship_type.value);
+        return MedicinalProductIndication_OtherTherapyBuilder { value: __value };
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicinalProductIndication_OtherTherapyBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(
+        &'a mut self,
+        val: &str,
+    ) -> &'a mut MedicinalProductIndication_OtherTherapyBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn medication_codeable_concept<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut MedicinalProductIndication_OtherTherapyBuilder {
+        self.value["medicationCodeableConcept"] = json!(val.value);
+        return self;
+    }
+
+    pub fn medication_reference<'a>(
+        &'a mut self,
+        val: Reference,
+    ) -> &'a mut MedicinalProductIndication_OtherTherapyBuilder {
+        self.value["medicationReference"] = json!(val.value);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MedicinalProductIndication_OtherTherapyBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

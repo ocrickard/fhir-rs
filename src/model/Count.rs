@@ -2,7 +2,9 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A measured amount (or an amount that can potentially be measured). Note that
 /// measured amounts include amounts that are not precisely quantified, including
@@ -10,23 +12,26 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct Count<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl Count<'_> {
-    /// A computer processable form of the unit in some unit representation system.
-    pub fn code(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("code") {
-            return Some(string);
+    pub fn new(value: &Value) -> Count {
+        Count {
+            value: Cow::Borrowed(value),
         }
-        return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for code
+    pub fn _code(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_code") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -34,16 +39,47 @@ impl Count<'_> {
     /// Extensions for comparator
     pub fn _comparator(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_comparator") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// The value of the measured amount. The value includes an implicit precision in
-    /// the presentation of the value.
-    pub fn value(&self) -> Option<f64> {
-        if let Some(val) = self.value.get("value") {
-            return Some(val.as_f64().unwrap());
+    /// Extensions for system
+    pub fn _system(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_system") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for unit
+    pub fn _unit(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_unit") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for value
+    pub fn _value(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_value") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// A computer processable form of the unit in some unit representation system.
+    pub fn code(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("code") {
+            return Some(string);
         }
         return None;
     }
@@ -58,22 +94,6 @@ impl Count<'_> {
         return None;
     }
 
-    /// Extensions for system
-    pub fn _system(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_system") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for unit
-    pub fn _unit(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_unit") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
     /// May be used to represent additional information that is not part of the basic
     /// definition of the element. To make the use of extensions safe and manageable,
     /// there is a strict set of governance  applied to the definition and use of
@@ -83,16 +103,19 @@ impl Count<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// A human-readable form of the unit.
-    pub fn unit(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("unit") {
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
         }
         return None;
@@ -106,50 +129,145 @@ impl Count<'_> {
         return None;
     }
 
-    /// Extensions for value
-    pub fn _value(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_value") {
-            return Some(Element { value: val });
+    /// A human-readable form of the unit.
+    pub fn unit(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("unit") {
+            return Some(string);
         }
         return None;
     }
 
-    /// Extensions for code
-    pub fn _code(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_code") {
-            return Some(Element { value: val });
+    /// The value of the measured amount. The value includes an implicit precision in
+    /// the presentation of the value.
+    pub fn value(&self) -> Option<f64> {
+        if let Some(val) = self.value.get("value") {
+            return Some(val.as_f64().unwrap());
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.code() {}
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self._comparator() {
-            _val.validate();
+        if let Some(_val) = self._code() {
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.value() {}
-        if let Some(_val) = self.comparator() {}
+        if let Some(_val) = self._comparator() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         if let Some(_val) = self._system() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._unit() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.unit() {}
-        if let Some(_val) = self.system() {}
         if let Some(_val) = self._value() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self._code() {
-            _val.validate();
+        if let Some(_val) = self.code() {}
+        if let Some(_val) = self.comparator() {}
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.system() {}
+        if let Some(_val) = self.unit() {}
+        if let Some(_val) = self.value() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct CountBuilder {
+    pub(crate) value: Value,
+}
+
+impl CountBuilder {
+    pub fn build(&self) -> Count {
+        Count {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: Count) -> CountBuilder {
+        CountBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> CountBuilder {
+        let mut __value: Value = json!({});
+        return CountBuilder { value: __value };
+    }
+
+    pub fn _code<'a>(&'a mut self, val: Element) -> &'a mut CountBuilder {
+        self.value["_code"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _comparator<'a>(&'a mut self, val: Element) -> &'a mut CountBuilder {
+        self.value["_comparator"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _system<'a>(&'a mut self, val: Element) -> &'a mut CountBuilder {
+        self.value["_system"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _unit<'a>(&'a mut self, val: Element) -> &'a mut CountBuilder {
+        self.value["_unit"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value<'a>(&'a mut self, val: Element) -> &'a mut CountBuilder {
+        self.value["_value"] = json!(val.value);
+        return self;
+    }
+
+    pub fn code<'a>(&'a mut self, val: &str) -> &'a mut CountBuilder {
+        self.value["code"] = json!(val);
+        return self;
+    }
+
+    pub fn comparator<'a>(&'a mut self, val: CountComparator) -> &'a mut CountBuilder {
+        self.value["comparator"] = json!(val.to_string());
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut CountBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut CountBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn system<'a>(&'a mut self, val: &str) -> &'a mut CountBuilder {
+        self.value["system"] = json!(val);
+        return self;
+    }
+
+    pub fn unit<'a>(&'a mut self, val: &str) -> &'a mut CountBuilder {
+        self.value["unit"] = json!(val);
+        return self;
+    }
+
+    pub fn value<'a>(&'a mut self, val: f64) -> &'a mut CountBuilder {
+        self.value["value"] = json!(val);
+        return self;
     }
 }
 
@@ -169,6 +287,15 @@ impl CountComparator {
             ">=" => Some(CountComparator::GreaterThanOrEqual),
             ">" => Some(CountComparator::GreaterThan),
             _ => None,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            CountComparator::LessThan => "<".to_string(),
+            CountComparator::LessThanOrEqual => "<=".to_string(),
+            CountComparator::GreaterThanOrEqual => ">=".to_string(),
+            CountComparator::GreaterThan => ">".to_string(),
         }
     }
 }

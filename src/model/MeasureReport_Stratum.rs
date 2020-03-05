@@ -5,22 +5,39 @@ use crate::model::Extension::Extension;
 use crate::model::MeasureReport_Component::MeasureReport_Component;
 use crate::model::MeasureReport_Population1::MeasureReport_Population1;
 use crate::model::Quantity::Quantity;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// The MeasureReport resource contains the results of the calculation of a measure;
 /// and optionally a reference to the resources involved in that calculation.
 
 #[derive(Debug)]
 pub struct MeasureReport_Stratum<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl MeasureReport_Stratum<'_> {
-    /// The measure score for this stratum, calculated as appropriate for the measure
-    /// type and scoring method, and based on only the members of this stratum.
-    pub fn measure_score(&self) -> Option<Quantity> {
-        if let Some(val) = self.value.get("measureScore") {
-            return Some(Quantity { value: val });
+    pub fn new(value: &Value) -> MeasureReport_Stratum {
+        MeasureReport_Stratum {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// A stratifier component value.
+    pub fn component(&self) -> Option<Vec<MeasureReport_Component>> {
+        if let Some(Value::Array(val)) = self.value.get("component") {
+            return Some(
+                val.into_iter()
+                    .map(|e| MeasureReport_Component {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
@@ -34,21 +51,31 @@ impl MeasureReport_Stratum<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// A stratifier component value.
-    pub fn component(&self) -> Option<Vec<MeasureReport_Component>> {
-        if let Some(Value::Array(val)) = self.value.get("component") {
-            return Some(
-                val.into_iter()
-                    .map(|e| MeasureReport_Component { value: e })
-                    .collect::<Vec<_>>(),
-            );
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// The measure score for this stratum, calculated as appropriate for the measure
+    /// type and scoring method, and based on only the members of this stratum.
+    pub fn measure_score(&self) -> Option<Quantity> {
+        if let Some(val) = self.value.get("measureScore") {
+            return Some(Quantity {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -68,28 +95,11 @@ impl MeasureReport_Stratum<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
-        }
-        return None;
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// The value for this stratum, expressed as a CodeableConcept. When defining
-    /// stratifiers on complex values, the value must be rendered such that the value
-    /// for each stratum within the stratifier is unique.
-    pub fn value(&self) -> Option<CodeableConcept> {
-        if let Some(val) = self.value.get("value") {
-            return Some(CodeableConcept { value: val });
         }
         return None;
     }
@@ -100,41 +110,131 @@ impl MeasureReport_Stratum<'_> {
         if let Some(Value::Array(val)) = self.value.get("population") {
             return Some(
                 val.into_iter()
-                    .map(|e| MeasureReport_Population1 { value: e })
+                    .map(|e| MeasureReport_Population1 {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
+    /// The value for this stratum, expressed as a CodeableConcept. When defining
+    /// stratifiers on complex values, the value must be rendered such that the value
+    /// for each stratum within the stratifier is unique.
+    pub fn value(&self) -> Option<CodeableConcept> {
+        if let Some(val) = self.value.get("value") {
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.measure_score() {
-            _val.validate();
+        if let Some(_val) = self.component() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.component() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
-        if let Some(_val) = self.value() {
-            _val.validate();
+        if let Some(_val) = self.measure_score() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.population() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.value() {
+            if !_val.validate() {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct MeasureReport_StratumBuilder {
+    pub(crate) value: Value,
+}
+
+impl MeasureReport_StratumBuilder {
+    pub fn build(&self) -> MeasureReport_Stratum {
+        MeasureReport_Stratum {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: MeasureReport_Stratum) -> MeasureReport_StratumBuilder {
+        MeasureReport_StratumBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> MeasureReport_StratumBuilder {
+        let mut __value: Value = json!({});
+        return MeasureReport_StratumBuilder { value: __value };
+    }
+
+    pub fn component<'a>(
+        &'a mut self,
+        val: Vec<MeasureReport_Component>,
+    ) -> &'a mut MeasureReport_StratumBuilder {
+        self.value["component"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MeasureReport_StratumBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut MeasureReport_StratumBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn measure_score<'a>(&'a mut self, val: Quantity) -> &'a mut MeasureReport_StratumBuilder {
+        self.value["measureScore"] = json!(val.value);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut MeasureReport_StratumBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn population<'a>(
+        &'a mut self,
+        val: Vec<MeasureReport_Population1>,
+    ) -> &'a mut MeasureReport_StratumBuilder {
+        self.value["population"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn value<'a>(&'a mut self, val: CodeableConcept) -> &'a mut MeasureReport_StratumBuilder {
+        self.value["value"] = json!(val.value);
+        return self;
     }
 }

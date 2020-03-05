@@ -2,48 +2,35 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A structured set of tests against a FHIR server or client implementation to
 /// determine compliance against the FHIR specification.
 
 #[derive(Debug)]
 pub struct TestScript_Variable<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl TestScript_Variable<'_> {
-    /// XPath or JSONPath to evaluate against the fixture body.  When variables are
-    /// defined, only one of either expression, headerField or path must be specified.
-    pub fn path(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("path") {
-            return Some(string);
+    pub fn new(value: &Value) -> TestScript_Variable {
+        TestScript_Variable {
+            value: Cow::Borrowed(value),
         }
-        return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
-    /// Will be used to grab the HTTP header field value from the headers that sourceId
-    /// is pointing to.
-    pub fn header_field(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("headerField") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for hint
-    pub fn _hint(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_hint") {
-            return Some(Element { value: val });
+    /// Extensions for defaultValue
+    pub fn _default_value(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_defaultValue") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -51,7 +38,59 @@ impl TestScript_Variable<'_> {
     /// Extensions for description
     pub fn _description(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_description") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for expression
+    pub fn _expression(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_expression") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for headerField
+    pub fn _header_field(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_headerField") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for hint
+    pub fn _hint(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_hint") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for name
+    pub fn _name(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_name") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for path
+    pub fn _path(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_path") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -59,15 +98,24 @@ impl TestScript_Variable<'_> {
     /// Extensions for sourceId
     pub fn _source_id(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_sourceId") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// Displayable text string with hint help information to the user when entering a
-    /// default value.
-    pub fn hint(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("hint") {
+    /// A default, hard-coded, or user-defined value for this variable.
+    pub fn default_value(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("defaultValue") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// A free text natural language description of the variable and its purpose.
+    pub fn description(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("description") {
             return Some(string);
         }
         return None;
@@ -91,82 +139,38 @@ impl TestScript_Variable<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Fixture to evaluate the XPath/JSONPath expression or the headerField  against
-    /// within this variable.
-    pub fn source_id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("sourceId") {
+    /// Will be used to grab the HTTP header field value from the headers that sourceId
+    /// is pointing to.
+    pub fn header_field(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("headerField") {
             return Some(string);
         }
         return None;
     }
 
-    /// Descriptive name for this variable.
-    pub fn name(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("name") {
+    /// Displayable text string with hint help information to the user when entering a
+    /// default value.
+    pub fn hint(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("hint") {
             return Some(string);
         }
         return None;
     }
 
-    /// Extensions for expression
-    pub fn _expression(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_expression") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for path
-    pub fn _path(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_path") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// A default, hard-coded, or user-defined value for this variable.
-    pub fn default_value(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("defaultValue") {
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for defaultValue
-    pub fn _default_value(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_defaultValue") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// A free text natural language description of the variable and its purpose.
-    pub fn description(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("description") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for headerField
-    pub fn _header_field(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_headerField") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for name
-    pub fn _name(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_name") {
-            return Some(Element { value: val });
         }
         return None;
     }
@@ -186,57 +190,224 @@ impl TestScript_Variable<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
+    /// Descriptive name for this variable.
+    pub fn name(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("name") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// XPath or JSONPath to evaluate against the fixture body.  When variables are
+    /// defined, only one of either expression, headerField or path must be specified.
+    pub fn path(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("path") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Fixture to evaluate the XPath/JSONPath expression or the headerField  against
+    /// within this variable.
+    pub fn source_id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("sourceId") {
+            return Some(string);
+        }
+        return None;
+    }
+
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.path() {}
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.header_field() {}
-        if let Some(_val) = self._hint() {
-            _val.validate();
+        if let Some(_val) = self._default_value() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._description() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self._source_id() {
-            _val.validate();
-        }
-        if let Some(_val) = self.hint() {}
-        if let Some(_val) = self.expression() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.source_id() {}
-        if let Some(_val) = self.name() {}
         if let Some(_val) = self._expression() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self._path() {
-            _val.validate();
-        }
-        if let Some(_val) = self.default_value() {}
-        if let Some(_val) = self._default_value() {
-            _val.validate();
-        }
-        if let Some(_val) = self.description() {}
         if let Some(_val) = self._header_field() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._hint() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._name() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self._path() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._source_id() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.default_value() {}
+        if let Some(_val) = self.description() {}
+        if let Some(_val) = self.expression() {}
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.header_field() {}
+        if let Some(_val) = self.hint() {}
+        if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.name() {}
+        if let Some(_val) = self.path() {}
+        if let Some(_val) = self.source_id() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct TestScript_VariableBuilder {
+    pub(crate) value: Value,
+}
+
+impl TestScript_VariableBuilder {
+    pub fn build(&self) -> TestScript_Variable {
+        TestScript_Variable {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: TestScript_Variable) -> TestScript_VariableBuilder {
+        TestScript_VariableBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> TestScript_VariableBuilder {
+        let mut __value: Value = json!({});
+        return TestScript_VariableBuilder { value: __value };
+    }
+
+    pub fn _default_value<'a>(&'a mut self, val: Element) -> &'a mut TestScript_VariableBuilder {
+        self.value["_defaultValue"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _description<'a>(&'a mut self, val: Element) -> &'a mut TestScript_VariableBuilder {
+        self.value["_description"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _expression<'a>(&'a mut self, val: Element) -> &'a mut TestScript_VariableBuilder {
+        self.value["_expression"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _header_field<'a>(&'a mut self, val: Element) -> &'a mut TestScript_VariableBuilder {
+        self.value["_headerField"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _hint<'a>(&'a mut self, val: Element) -> &'a mut TestScript_VariableBuilder {
+        self.value["_hint"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _name<'a>(&'a mut self, val: Element) -> &'a mut TestScript_VariableBuilder {
+        self.value["_name"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _path<'a>(&'a mut self, val: Element) -> &'a mut TestScript_VariableBuilder {
+        self.value["_path"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _source_id<'a>(&'a mut self, val: Element) -> &'a mut TestScript_VariableBuilder {
+        self.value["_sourceId"] = json!(val.value);
+        return self;
+    }
+
+    pub fn default_value<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["defaultValue"] = json!(val);
+        return self;
+    }
+
+    pub fn description<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["description"] = json!(val);
+        return self;
+    }
+
+    pub fn expression<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["expression"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut TestScript_VariableBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn header_field<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["headerField"] = json!(val);
+        return self;
+    }
+
+    pub fn hint<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["hint"] = json!(val);
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut TestScript_VariableBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn name<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["name"] = json!(val);
+        return self;
+    }
+
+    pub fn path<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["path"] = json!(val);
+        return self;
+    }
+
+    pub fn source_id<'a>(&'a mut self, val: &str) -> &'a mut TestScript_VariableBuilder {
+        self.value["sourceId"] = json!(val);
+        return self;
     }
 }

@@ -4,45 +4,64 @@ use crate::model::Element::Element;
 use crate::model::ExampleScenario_ContainedInstance::ExampleScenario_ContainedInstance;
 use crate::model::ExampleScenario_Version::ExampleScenario_Version;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Example of workflow instance.
 
 #[derive(Debug)]
 pub struct ExampleScenario_Instance<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl ExampleScenario_Instance<'_> {
-    /// The type of the resource.
-    pub fn resource_type(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("resourceType") {
-            return Some(string);
+    pub fn new(value: &Value) -> ExampleScenario_Instance {
+        ExampleScenario_Instance {
+            value: Cow::Borrowed(value),
         }
-        return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Human-friendly description of the resource instance.
-    pub fn description(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("description") {
-            return Some(string);
-        }
-        return None;
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
     /// Extensions for description
     pub fn _description(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_description") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for name
+    pub fn _name(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_name") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for resourceId
+    pub fn _resource_id(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_resourceId") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for resourceType
+    pub fn _resource_type(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_resourceType") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -53,44 +72,18 @@ impl ExampleScenario_Instance<'_> {
         if let Some(Value::Array(val)) = self.value.get("containedInstance") {
             return Some(
                 val.into_iter()
-                    .map(|e| ExampleScenario_ContainedInstance { value: e })
+                    .map(|e| ExampleScenario_ContainedInstance {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// The id of the resource for referencing.
-    pub fn resource_id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("resourceId") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// A specific version of the resource.
-    pub fn version(&self) -> Option<Vec<ExampleScenario_Version>> {
-        if let Some(Value::Array(val)) = self.value.get("version") {
-            return Some(
-                val.into_iter()
-                    .map(|e| ExampleScenario_Version { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// Extensions for resourceType
-    pub fn _resource_type(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_resourceType") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// A short name for the resource instance.
-    pub fn name(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("name") {
+    /// Human-friendly description of the resource instance.
+    pub fn description(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("description") {
             return Some(string);
         }
         return None;
@@ -105,9 +98,20 @@ impl ExampleScenario_Instance<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -127,67 +131,205 @@ impl ExampleScenario_Instance<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for name
-    pub fn _name(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_name") {
-            return Some(Element { value: val });
+    /// A short name for the resource instance.
+    pub fn name(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("name") {
+            return Some(string);
         }
         return None;
     }
 
-    /// Extensions for resourceId
-    pub fn _resource_id(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_resourceId") {
-            return Some(Element { value: val });
+    /// The id of the resource for referencing.
+    pub fn resource_id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("resourceId") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// The type of the resource.
+    pub fn resource_type(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("resourceType") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// A specific version of the resource.
+    pub fn version(&self) -> Option<Vec<ExampleScenario_Version>> {
+        if let Some(Value::Array(val)) = self.value.get("version") {
+            return Some(
+                val.into_iter()
+                    .map(|e| ExampleScenario_Version {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.resource_type() {}
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.description() {}
         if let Some(_val) = self._description() {
-            _val.validate();
-        }
-        if let Some(_val) = self.contained_instance() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.resource_id() {}
-        if let Some(_val) = self.version() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self._resource_type() {
-            _val.validate();
-        }
-        if let Some(_val) = self.name() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._name() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._resource_id() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._resource_type() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.contained_instance() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.description() {}
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.name() {}
+        if let Some(_val) = self.resource_id() {}
+        if let Some(_val) = self.resource_type() {}
+        if let Some(_val) = self.version() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct ExampleScenario_InstanceBuilder {
+    pub(crate) value: Value,
+}
+
+impl ExampleScenario_InstanceBuilder {
+    pub fn build(&self) -> ExampleScenario_Instance {
+        ExampleScenario_Instance {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: ExampleScenario_Instance) -> ExampleScenario_InstanceBuilder {
+        ExampleScenario_InstanceBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> ExampleScenario_InstanceBuilder {
+        let mut __value: Value = json!({});
+        return ExampleScenario_InstanceBuilder { value: __value };
+    }
+
+    pub fn _description<'a>(&'a mut self, val: Element) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["_description"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _name<'a>(&'a mut self, val: Element) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["_name"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _resource_id<'a>(&'a mut self, val: Element) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["_resourceId"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _resource_type<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["_resourceType"] = json!(val.value);
+        return self;
+    }
+
+    pub fn contained_instance<'a>(
+        &'a mut self,
+        val: Vec<ExampleScenario_ContainedInstance>,
+    ) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["containedInstance"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn description<'a>(&'a mut self, val: &str) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["description"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn name<'a>(&'a mut self, val: &str) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["name"] = json!(val);
+        return self;
+    }
+
+    pub fn resource_id<'a>(&'a mut self, val: &str) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["resourceId"] = json!(val);
+        return self;
+    }
+
+    pub fn resource_type<'a>(&'a mut self, val: &str) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["resourceType"] = json!(val);
+        return self;
+    }
+
+    pub fn version<'a>(
+        &'a mut self,
+        val: Vec<ExampleScenario_Version>,
+    ) -> &'a mut ExampleScenario_InstanceBuilder {
+        self.value["version"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

@@ -6,41 +6,56 @@ use crate::model::Extension::Extension;
 use crate::model::SubstanceAmount::SubstanceAmount;
 use crate::model::SubstancePolymer_DegreeOfPolymerisation::SubstancePolymer_DegreeOfPolymerisation;
 use crate::model::SubstancePolymer_StructuralRepresentation::SubstancePolymer_StructuralRepresentation;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Todo.
 
 #[derive(Debug)]
 pub struct SubstancePolymer_RepeatUnit<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl SubstancePolymer_RepeatUnit<'_> {
+    pub fn new(value: &Value) -> SubstancePolymer_RepeatUnit {
+        SubstancePolymer_RepeatUnit {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for repeatUnit
+    pub fn _repeat_unit(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_repeatUnit") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
     /// Todo.
     pub fn amount(&self) -> Option<SubstanceAmount> {
         if let Some(val) = self.value.get("amount") {
-            return Some(SubstanceAmount { value: val });
-        }
-        return None;
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+            return Some(SubstanceAmount {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
     /// Todo.
-    pub fn structural_representation(
-        &self,
-    ) -> Option<Vec<SubstancePolymer_StructuralRepresentation>> {
-        if let Some(Value::Array(val)) = self.value.get("structuralRepresentation") {
+    pub fn degree_of_polymerisation(&self) -> Option<Vec<SubstancePolymer_DegreeOfPolymerisation>> {
+        if let Some(Value::Array(val)) = self.value.get("degreeOfPolymerisation") {
             return Some(
                 val.into_iter()
-                    .map(|e| SubstancePolymer_StructuralRepresentation { value: e })
+                    .map(|e| SubstancePolymer_DegreeOfPolymerisation {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -56,21 +71,20 @@ impl SubstancePolymer_RepeatUnit<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Todo.
-    pub fn degree_of_polymerisation(&self) -> Option<Vec<SubstancePolymer_DegreeOfPolymerisation>> {
-        if let Some(Value::Array(val)) = self.value.get("degreeOfPolymerisation") {
-            return Some(
-                val.into_iter()
-                    .map(|e| SubstancePolymer_DegreeOfPolymerisation { value: e })
-                    .collect::<Vec<_>>(),
-            );
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -90,17 +104,21 @@ impl SubstancePolymer_RepeatUnit<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for repeatUnit
-    pub fn _repeat_unit(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_repeatUnit") {
-            return Some(Element { value: val });
+    /// Todo.
+    pub fn orientation_of_polymerisation(&self) -> Option<CodeableConcept> {
+        if let Some(val) = self.value.get("orientationOfPolymerisation") {
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -114,45 +132,152 @@ impl SubstancePolymer_RepeatUnit<'_> {
     }
 
     /// Todo.
-    pub fn orientation_of_polymerisation(&self) -> Option<CodeableConcept> {
-        if let Some(val) = self.value.get("orientationOfPolymerisation") {
-            return Some(CodeableConcept { value: val });
+    pub fn structural_representation(
+        &self,
+    ) -> Option<Vec<SubstancePolymer_StructuralRepresentation>> {
+        if let Some(Value::Array(val)) = self.value.get("structuralRepresentation") {
+            return Some(
+                val.into_iter()
+                    .map(|e| SubstancePolymer_StructuralRepresentation {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
+        if let Some(_val) = self._repeat_unit() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         if let Some(_val) = self.amount() {
-            _val.validate();
-        }
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.structural_representation() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.degree_of_polymerisation() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self._repeat_unit() {
-            _val.validate();
+        if let Some(_val) = self.orientation_of_polymerisation() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.repeat_unit() {}
-        if let Some(_val) = self.orientation_of_polymerisation() {
-            _val.validate();
+        if let Some(_val) = self.structural_representation() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct SubstancePolymer_RepeatUnitBuilder {
+    pub(crate) value: Value,
+}
+
+impl SubstancePolymer_RepeatUnitBuilder {
+    pub fn build(&self) -> SubstancePolymer_RepeatUnit {
+        SubstancePolymer_RepeatUnit {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: SubstancePolymer_RepeatUnit) -> SubstancePolymer_RepeatUnitBuilder {
+        SubstancePolymer_RepeatUnitBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> SubstancePolymer_RepeatUnitBuilder {
+        let mut __value: Value = json!({});
+        return SubstancePolymer_RepeatUnitBuilder { value: __value };
+    }
+
+    pub fn _repeat_unit<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["_repeatUnit"] = json!(val.value);
+        return self;
+    }
+
+    pub fn amount<'a>(
+        &'a mut self,
+        val: SubstanceAmount,
+    ) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["amount"] = json!(val.value);
+        return self;
+    }
+
+    pub fn degree_of_polymerisation<'a>(
+        &'a mut self,
+        val: Vec<SubstancePolymer_DegreeOfPolymerisation>,
+    ) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["degreeOfPolymerisation"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn orientation_of_polymerisation<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["orientationOfPolymerisation"] = json!(val.value);
+        return self;
+    }
+
+    pub fn repeat_unit<'a>(&'a mut self, val: &str) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["repeatUnit"] = json!(val);
+        return self;
+    }
+
+    pub fn structural_representation<'a>(
+        &'a mut self,
+        val: Vec<SubstancePolymer_StructuralRepresentation>,
+    ) -> &'a mut SubstancePolymer_RepeatUnitBuilder {
+        self.value["structuralRepresentation"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
     }
 }

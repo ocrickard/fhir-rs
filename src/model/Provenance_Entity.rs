@@ -4,7 +4,9 @@ use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::Provenance_Agent::Provenance_Agent;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// Provenance of a resource is a record that describes entities and processes
 /// involved in producing and delivering or otherwise influencing that resource.
@@ -18,10 +20,30 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct Provenance_Entity<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl Provenance_Entity<'_> {
+    pub fn new(value: &Value) -> Provenance_Entity {
+        Provenance_Entity {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for role
+    pub fn _role(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_role") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
     /// The entity is attributed to an agent to express the agent's responsibility for
     /// that entity, possibly along with other agents. This description can be
     /// understood as shorthand for saying that the agent was responsible for the
@@ -30,7 +52,27 @@ impl Provenance_Entity<'_> {
         if let Some(Value::Array(val)) = self.value.get("agent") {
             return Some(
                 val.into_iter()
-                    .map(|e| Provenance_Agent { value: e })
+                    .map(|e| Provenance_Agent {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
+    /// May be used to represent additional information that is not part of the basic
+    /// definition of the element. To make the use of extensions safe and manageable,
+    /// there is a strict set of governance  applied to the definition and use of
+    /// extensions. Though any implementer can define an extension, there is a set of
+    /// requirements that SHALL be met as part of the definition of the extension.
+    pub fn extension(&self) -> Option<Vec<Extension>> {
+        if let Some(Value::Array(val)) = self.value.get("extension") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -61,23 +103,9 @@ impl Provenance_Entity<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// May be used to represent additional information that is not part of the basic
-    /// definition of the element. To make the use of extensions safe and manageable,
-    /// there is a strict set of governance  applied to the definition and use of
-    /// extensions. Though any implementer can define an extension, there is a set of
-    /// requirements that SHALL be met as part of the definition of the extension.
-    pub fn extension(&self) -> Option<Vec<Extension>> {
-        if let Some(Value::Array(val)) = self.value.get("extension") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -92,45 +120,100 @@ impl Provenance_Entity<'_> {
         return None;
     }
 
-    /// Extensions for role
-    pub fn _role(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_role") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
     /// Identity of the  Entity used. May be a logical or physical uri and maybe
     /// absolute or relative.
     pub fn what(&self) -> Reference {
         Reference {
-            value: &self.value["what"],
+            value: Cow::Borrowed(&self.value["what"]),
         }
     }
 
     pub fn validate(&self) -> bool {
+        if let Some(_val) = self._role() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         if let Some(_val) = self.agent() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.role() {}
-        if let Some(_val) = self._role() {
-            _val.validate();
+        if !self.what().validate() {
+            return false;
         }
-        let _ = self.what().validate();
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct Provenance_EntityBuilder {
+    pub(crate) value: Value,
+}
+
+impl Provenance_EntityBuilder {
+    pub fn build(&self) -> Provenance_Entity {
+        Provenance_Entity {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: Provenance_Entity) -> Provenance_EntityBuilder {
+        Provenance_EntityBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(what: Reference) -> Provenance_EntityBuilder {
+        let mut __value: Value = json!({});
+        __value["what"] = json!(what.value);
+        return Provenance_EntityBuilder { value: __value };
+    }
+
+    pub fn _role<'a>(&'a mut self, val: Element) -> &'a mut Provenance_EntityBuilder {
+        self.value["_role"] = json!(val.value);
+        return self;
+    }
+
+    pub fn agent<'a>(&'a mut self, val: Vec<Provenance_Agent>) -> &'a mut Provenance_EntityBuilder {
+        self.value["agent"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut Provenance_EntityBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut Provenance_EntityBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Provenance_EntityBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn role<'a>(&'a mut self, val: Provenance_EntityRole) -> &'a mut Provenance_EntityBuilder {
+        self.value["role"] = json!(val.to_string());
+        return self;
     }
 }
 
@@ -152,6 +235,16 @@ impl Provenance_EntityRole {
             "source" => Some(Provenance_EntityRole::Source),
             "removal" => Some(Provenance_EntityRole::Removal),
             _ => None,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Provenance_EntityRole::Derivation => "derivation".to_string(),
+            Provenance_EntityRole::Revision => "revision".to_string(),
+            Provenance_EntityRole::Quotation => "quotation".to_string(),
+            Provenance_EntityRole::Source => "source".to_string(),
+            Provenance_EntityRole::Removal => "removal".to_string(),
         }
     }
 }

@@ -2,30 +2,45 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// This resource provides the details including amount of a payment and allocates
 /// the payment items being paid.
 
 #[derive(Debug)]
 pub struct PaymentReconciliation_ProcessNote<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl PaymentReconciliation_ProcessNote<'_> {
-    /// The explanation or description associated with the processing.
-    pub fn text(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("text") {
-            return Some(string);
+    pub fn new(value: &Value) -> PaymentReconciliation_ProcessNote {
+        PaymentReconciliation_ProcessNote {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for text
+    pub fn _text(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_text") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    /// Extensions for type
+    pub fn _type(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_type") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -39,9 +54,20 @@ impl PaymentReconciliation_ProcessNote<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -61,17 +87,19 @@ impl PaymentReconciliation_ProcessNote<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for type
-    pub fn _type(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_type") {
-            return Some(Element { value: val });
+    /// The explanation or description associated with the processing.
+    pub fn text(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("text") {
+            return Some(string);
         }
         return None;
     }
@@ -84,35 +112,108 @@ impl PaymentReconciliation_ProcessNote<'_> {
         return None;
     }
 
-    /// Extensions for text
-    pub fn _text(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_text") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.text() {}
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+        if let Some(_val) = self._text() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._type() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.text() {}
         if let Some(_val) = self.fhir_type() {}
-        if let Some(_val) = self._text() {
-            _val.validate();
-        }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct PaymentReconciliation_ProcessNoteBuilder {
+    pub(crate) value: Value,
+}
+
+impl PaymentReconciliation_ProcessNoteBuilder {
+    pub fn build(&self) -> PaymentReconciliation_ProcessNote {
+        PaymentReconciliation_ProcessNote {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(
+        existing: PaymentReconciliation_ProcessNote,
+    ) -> PaymentReconciliation_ProcessNoteBuilder {
+        PaymentReconciliation_ProcessNoteBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> PaymentReconciliation_ProcessNoteBuilder {
+        let mut __value: Value = json!({});
+        return PaymentReconciliation_ProcessNoteBuilder { value: __value };
+    }
+
+    pub fn _text<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut PaymentReconciliation_ProcessNoteBuilder {
+        self.value["_text"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _type<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut PaymentReconciliation_ProcessNoteBuilder {
+        self.value["_type"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut PaymentReconciliation_ProcessNoteBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut PaymentReconciliation_ProcessNoteBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut PaymentReconciliation_ProcessNoteBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn text<'a>(&'a mut self, val: &str) -> &'a mut PaymentReconciliation_ProcessNoteBuilder {
+        self.value["text"] = json!(val);
+        return self;
+    }
+
+    pub fn fhir_type<'a>(
+        &'a mut self,
+        val: PaymentReconciliation_ProcessNoteType,
+    ) -> &'a mut PaymentReconciliation_ProcessNoteBuilder {
+        self.value["type"] = json!(val.to_string());
+        return self;
     }
 }
 
@@ -130,6 +231,14 @@ impl PaymentReconciliation_ProcessNoteType {
             "print" => Some(PaymentReconciliation_ProcessNoteType::Print),
             "printoper" => Some(PaymentReconciliation_ProcessNoteType::Printoper),
             _ => None,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            PaymentReconciliation_ProcessNoteType::Display => "display".to_string(),
+            PaymentReconciliation_ProcessNoteType::Print => "print".to_string(),
+            PaymentReconciliation_ProcessNoteType::Printoper => "printoper".to_string(),
         }
     }
 }

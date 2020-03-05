@@ -3,7 +3,9 @@
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::ValueSet_Designation::ValueSet_Designation;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A ValueSet resource instance specifies a set of codes drawn from one or more
 /// code systems, intended for use in a particular context. Value sets link between
@@ -12,47 +14,46 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct ValueSet_Contains<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl ValueSet_Contains<'_> {
-    /// May be used to represent additional information that is not part of the basic
-    /// definition of the element. To make the use of extensions safe and manageable,
-    /// there is a strict set of governance  applied to the definition and use of
-    /// extensions. Though any implementer can define an extension, there is a set of
-    /// requirements that SHALL be met as part of the definition of the extension.
-    pub fn extension(&self) -> Option<Vec<Extension>> {
-        if let Some(Value::Array(val)) = self.value.get("extension") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Extension { value: e })
-                    .collect::<Vec<_>>(),
-            );
+    pub fn new(value: &Value) -> ValueSet_Contains {
+        ValueSet_Contains {
+            value: Cow::Borrowed(value),
         }
-        return None;
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
     /// Extensions for abstract
     pub fn _abstract(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_abstract") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// Extensions for version
-    pub fn _version(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_version") {
-            return Some(Element { value: val });
+    /// Extensions for code
+    pub fn _code(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_code") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// An absolute URI which is the code system in which the code for this item in the
-    /// expansion is defined.
-    pub fn system(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("system") {
-            return Some(string);
+    /// Extensions for display
+    pub fn _display(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_display") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -60,7 +61,38 @@ impl ValueSet_Contains<'_> {
     /// Extensions for inactive
     pub fn _inactive(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_inactive") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for system
+    pub fn _system(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_system") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for version
+    pub fn _version(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_version") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// If true, this entry is included in the expansion for navigational purposes, and
+    /// the user cannot select the code directly as a proper value.
+    pub fn fhir_abstract(&self) -> Option<bool> {
+        if let Some(val) = self.value.get("abstract") {
+            return Some(val.as_bool().unwrap());
         }
         return None;
     }
@@ -75,18 +107,58 @@ impl ValueSet_Contains<'_> {
         return None;
     }
 
-    /// Extensions for system
-    pub fn _system(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_system") {
-            return Some(Element { value: val });
+    /// Other codes and entries contained under this entry in the hierarchy.
+    pub fn contains(&self) -> Option<Vec<ValueSet_Contains>> {
+        if let Some(Value::Array(val)) = self.value.get("contains") {
+            return Some(
+                val.into_iter()
+                    .map(|e| ValueSet_Contains {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
 
-    /// Extensions for display
-    pub fn _display(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_display") {
-            return Some(Element { value: val });
+    /// Additional representations for this item - other languages, aliases, specialized
+    /// purposes, used for particular purposes, etc. These are relevant when the
+    /// conditions of the expansion do not fix to a single correct representation.
+    pub fn designation(&self) -> Option<Vec<ValueSet_Designation>> {
+        if let Some(Value::Array(val)) = self.value.get("designation") {
+            return Some(
+                val.into_iter()
+                    .map(|e| ValueSet_Designation {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
+    /// The recommended display for this item in the expansion.
+    pub fn display(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("display") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// May be used to represent additional information that is not part of the basic
+    /// definition of the element. To make the use of extensions safe and manageable,
+    /// there is a strict set of governance  applied to the definition and use of
+    /// extensions. Though any implementer can define an extension, there is a set of
+    /// requirements that SHALL be met as part of the definition of the extension.
+    pub fn extension(&self) -> Option<Vec<Extension>> {
+        if let Some(Value::Array(val)) = self.value.get("extension") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
         }
         return None;
     }
@@ -100,49 +172,6 @@ impl ValueSet_Contains<'_> {
         return None;
     }
 
-    /// Extensions for code
-    pub fn _code(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_code") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Additional representations for this item - other languages, aliases, specialized
-    /// purposes, used for particular purposes, etc. These are relevant when the
-    /// conditions of the expansion do not fix to a single correct representation.
-    pub fn designation(&self) -> Option<Vec<ValueSet_Designation>> {
-        if let Some(Value::Array(val)) = self.value.get("designation") {
-            return Some(
-                val.into_iter()
-                    .map(|e| ValueSet_Designation { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// The version of the code system from this code was taken. Note that a well-
-    /// maintained code system does not need the version reported, because the
-    /// meaning of codes is consistent across versions. However this cannot consistently
-    /// be assured, and when the meaning is not guaranteed to be consistent, the version
-    /// SHOULD be exchanged.
-    pub fn version(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("version") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// If true, this entry is included in the expansion for navigational purposes, and
-    /// the user cannot select the code directly as a proper value.
-    pub fn fhir_abstract(&self) -> Option<bool> {
-        if let Some(val) = self.value.get("abstract") {
-            return Some(val.as_bool().unwrap());
-        }
-        return None;
-    }
-
     /// If the concept is inactive in the code system that defines it. Inactive codes
     /// are those that are no longer to be used, but are maintained by the code system
     /// for understanding legacy data. It might not be known or specified whether an
@@ -150,14 +179,6 @@ impl ValueSet_Contains<'_> {
     pub fn inactive(&self) -> Option<bool> {
         if let Some(val) = self.value.get("inactive") {
             return Some(val.as_bool().unwrap());
-        }
-        return None;
-    }
-
-    /// The recommended display for this item in the expansion.
-    pub fn display(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("display") {
-            return Some(string);
         }
         return None;
     }
@@ -177,71 +198,213 @@ impl ValueSet_Contains<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Other codes and entries contained under this entry in the hierarchy.
-    pub fn contains(&self) -> Option<Vec<ValueSet_Contains>> {
-        if let Some(Value::Array(val)) = self.value.get("contains") {
-            return Some(
-                val.into_iter()
-                    .map(|e| ValueSet_Contains { value: e })
-                    .collect::<Vec<_>>(),
-            );
+    /// An absolute URI which is the code system in which the code for this item in the
+    /// expansion is defined.
+    pub fn system(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("system") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// The version of the code system from this code was taken. Note that a well-
+    /// maintained code system does not need the version reported, because the
+    /// meaning of codes is consistent across versions. However this cannot consistently
+    /// be assured, and when the meaning is not guaranteed to be consistent, the version
+    /// SHOULD be exchanged.
+    pub fn version(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("version") {
+            return Some(string);
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
         if let Some(_val) = self._abstract() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self._version() {
-            _val.validate();
-        }
-        if let Some(_val) = self.system() {}
-        if let Some(_val) = self._inactive() {
-            _val.validate();
-        }
-        if let Some(_val) = self.code() {}
-        if let Some(_val) = self._system() {
-            _val.validate();
+        if let Some(_val) = self._code() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._display() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self._code() {
-            _val.validate();
+        if let Some(_val) = self._inactive() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._system() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._version() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.fhir_abstract() {}
+        if let Some(_val) = self.code() {}
+        if let Some(_val) = self.contains() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.designation() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self.version() {}
-        if let Some(_val) = self.fhir_abstract() {}
-        if let Some(_val) = self.inactive() {}
         if let Some(_val) = self.display() {}
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.inactive() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self.contains() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
+        if let Some(_val) = self.system() {}
+        if let Some(_val) = self.version() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct ValueSet_ContainsBuilder {
+    pub(crate) value: Value,
+}
+
+impl ValueSet_ContainsBuilder {
+    pub fn build(&self) -> ValueSet_Contains {
+        ValueSet_Contains {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: ValueSet_Contains) -> ValueSet_ContainsBuilder {
+        ValueSet_ContainsBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> ValueSet_ContainsBuilder {
+        let mut __value: Value = json!({});
+        return ValueSet_ContainsBuilder { value: __value };
+    }
+
+    pub fn _abstract<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["_abstract"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _code<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["_code"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _display<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["_display"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _inactive<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["_inactive"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _system<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["_system"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _version<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["_version"] = json!(val.value);
+        return self;
+    }
+
+    pub fn fhir_abstract<'a>(&'a mut self, val: bool) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["abstract"] = json!(val);
+        return self;
+    }
+
+    pub fn code<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["code"] = json!(val);
+        return self;
+    }
+
+    pub fn contains<'a>(
+        &'a mut self,
+        val: Vec<ValueSet_Contains>,
+    ) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["contains"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn designation<'a>(
+        &'a mut self,
+        val: Vec<ValueSet_Designation>,
+    ) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["designation"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn display<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["display"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn inactive<'a>(&'a mut self, val: bool) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["inactive"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn system<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["system"] = json!(val);
+        return self;
+    }
+
+    pub fn version<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ContainsBuilder {
+        self.value["version"] = json!(val);
+        return self;
     }
 }

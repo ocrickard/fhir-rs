@@ -2,7 +2,9 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A ValueSet resource instance specifies a set of codes drawn from one or more
 /// code systems, intended for use in a particular context. Value sets link between
@@ -11,14 +13,46 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct ValueSet_Parameter<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl ValueSet_Parameter<'_> {
-    /// Extensions for valueDecimal
-    pub fn _value_decimal(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueDecimal") {
-            return Some(Element { value: val });
+    pub fn new(value: &Value) -> ValueSet_Parameter {
+        ValueSet_Parameter {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for name
+    pub fn _name(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_name") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for valueBoolean
+    pub fn _value_boolean(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueBoolean") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for valueCode
+    pub fn _value_code(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueCode") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -26,58 +60,49 @@ impl ValueSet_Parameter<'_> {
     /// Extensions for valueDateTime
     pub fn _value_date_time(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_valueDateTime") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// The value of the parameter.
-    pub fn value_decimal(&self) -> Option<f64> {
-        if let Some(val) = self.value.get("valueDecimal") {
-            return Some(val.as_f64().unwrap());
+    /// Extensions for valueDecimal
+    pub fn _value_decimal(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueDecimal") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// The value of the parameter.
-    pub fn value_string(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("valueString") {
-            return Some(string);
+    /// Extensions for valueInteger
+    pub fn _value_integer(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueInteger") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// Name of the input parameter to the $expand operation; may be a server-assigned
-    /// name for additional default or other server-supplied parameters used to control
-    /// the expansion process.
-    pub fn name(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("name") {
-            return Some(string);
+    /// Extensions for valueString
+    pub fn _value_string(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueString") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// The value of the parameter.
-    pub fn value_integer(&self) -> Option<f64> {
-        if let Some(val) = self.value.get("valueInteger") {
-            return Some(val.as_f64().unwrap());
-        }
-        return None;
-    }
-
-    /// The value of the parameter.
-    pub fn value_code(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("valueCode") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    /// Extensions for valueUri
+    pub fn _value_uri(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_valueUri") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -91,81 +116,20 @@ impl ValueSet_Parameter<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Extensions for valueInteger
-    pub fn _value_integer(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueInteger") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for name
-    pub fn _name(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_name") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for valueBoolean
-    pub fn _value_boolean(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueBoolean") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for valueUri
-    pub fn _value_uri(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueUri") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// The value of the parameter.
-    pub fn value_date_time(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("valueDateTime") {
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
             return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for valueCode
-    pub fn _value_code(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueCode") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for valueString
-    pub fn _value_string(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_valueString") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// The value of the parameter.
-    pub fn value_uri(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("valueUri") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// The value of the parameter.
-    pub fn value_boolean(&self) -> Option<bool> {
-        if let Some(val) = self.value.get("valueBoolean") {
-            return Some(val.as_bool().unwrap());
         }
         return None;
     }
@@ -185,57 +149,264 @@ impl ValueSet_Parameter<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
+    /// Name of the input parameter to the $expand operation; may be a server-assigned
+    /// name for additional default or other server-supplied parameters used to control
+    /// the expansion process.
+    pub fn name(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("name") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// The value of the parameter.
+    pub fn value_boolean(&self) -> Option<bool> {
+        if let Some(val) = self.value.get("valueBoolean") {
+            return Some(val.as_bool().unwrap());
+        }
+        return None;
+    }
+
+    /// The value of the parameter.
+    pub fn value_code(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("valueCode") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// The value of the parameter.
+    pub fn value_date_time(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("valueDateTime") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// The value of the parameter.
+    pub fn value_decimal(&self) -> Option<f64> {
+        if let Some(val) = self.value.get("valueDecimal") {
+            return Some(val.as_f64().unwrap());
+        }
+        return None;
+    }
+
+    /// The value of the parameter.
+    pub fn value_integer(&self) -> Option<f64> {
+        if let Some(val) = self.value.get("valueInteger") {
+            return Some(val.as_f64().unwrap());
+        }
+        return None;
+    }
+
+    /// The value of the parameter.
+    pub fn value_string(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("valueString") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// The value of the parameter.
+    pub fn value_uri(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("valueUri") {
+            return Some(string);
+        }
+        return None;
+    }
+
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self._value_decimal() {
-            _val.validate();
-        }
-        if let Some(_val) = self._value_date_time() {
-            _val.validate();
-        }
-        if let Some(_val) = self.value_decimal() {}
-        if let Some(_val) = self.value_string() {}
-        if let Some(_val) = self.name() {}
-        if let Some(_val) = self.value_integer() {}
-        if let Some(_val) = self.value_code() {}
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self._value_integer() {
-            _val.validate();
-        }
         if let Some(_val) = self._name() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._value_boolean() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self._value_uri() {
-            _val.validate();
-        }
-        if let Some(_val) = self.value_date_time() {}
         if let Some(_val) = self._value_code() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value_date_time() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value_decimal() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self._value_integer() {
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._value_string() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.value_uri() {}
-        if let Some(_val) = self.value_boolean() {}
+        if let Some(_val) = self._value_uri() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.name() {}
+        if let Some(_val) = self.value_boolean() {}
+        if let Some(_val) = self.value_code() {}
+        if let Some(_val) = self.value_date_time() {}
+        if let Some(_val) = self.value_decimal() {}
+        if let Some(_val) = self.value_integer() {}
+        if let Some(_val) = self.value_string() {}
+        if let Some(_val) = self.value_uri() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct ValueSet_ParameterBuilder {
+    pub(crate) value: Value,
+}
+
+impl ValueSet_ParameterBuilder {
+    pub fn build(&self) -> ValueSet_Parameter {
+        ValueSet_Parameter {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: ValueSet_Parameter) -> ValueSet_ParameterBuilder {
+        ValueSet_ParameterBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> ValueSet_ParameterBuilder {
+        let mut __value: Value = json!({});
+        return ValueSet_ParameterBuilder { value: __value };
+    }
+
+    pub fn _name<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["_name"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_boolean<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["_valueBoolean"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_code<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["_valueCode"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_date_time<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["_valueDateTime"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_decimal<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["_valueDecimal"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_integer<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["_valueInteger"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_string<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["_valueString"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _value_uri<'a>(&'a mut self, val: Element) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["_valueUri"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn name<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["name"] = json!(val);
+        return self;
+    }
+
+    pub fn value_boolean<'a>(&'a mut self, val: bool) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["valueBoolean"] = json!(val);
+        return self;
+    }
+
+    pub fn value_code<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["valueCode"] = json!(val);
+        return self;
+    }
+
+    pub fn value_date_time<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["valueDateTime"] = json!(val);
+        return self;
+    }
+
+    pub fn value_decimal<'a>(&'a mut self, val: f64) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["valueDecimal"] = json!(val);
+        return self;
+    }
+
+    pub fn value_integer<'a>(&'a mut self, val: f64) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["valueInteger"] = json!(val);
+        return self;
+    }
+
+    pub fn value_string<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["valueString"] = json!(val);
+        return self;
+    }
+
+    pub fn value_uri<'a>(&'a mut self, val: &str) -> &'a mut ValueSet_ParameterBuilder {
+        self.value["valueUri"] = json!(val);
+        return self;
     }
 }

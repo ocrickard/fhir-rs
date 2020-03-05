@@ -4,7 +4,9 @@ use crate::model::CodeableConcept::CodeableConcept;
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::Money::Money;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// This resource provides: the claim details; adjudication details from the
 /// processing of a Claim; and optionally account balance information, for informing
@@ -12,10 +14,40 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct ExplanationOfBenefit_Adjudication<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl ExplanationOfBenefit_Adjudication<'_> {
+    pub fn new(value: &Value) -> ExplanationOfBenefit_Adjudication {
+        ExplanationOfBenefit_Adjudication {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for value
+    pub fn _value(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_value") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Monetary amount associated with the category.
+    pub fn amount(&self) -> Option<Money> {
+        if let Some(val) = self.value.get("amount") {
+            return Some(Money {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
     /// A code to indicate the information type of this adjudication record. Information
     /// types may include: the value submitted, maximum values or percentages allowed or
     /// payable under the plan, amounts that the patient is responsible for in-aggregate
@@ -23,8 +55,35 @@ impl ExplanationOfBenefit_Adjudication<'_> {
     /// payable for this item.
     pub fn category(&self) -> CodeableConcept {
         CodeableConcept {
-            value: &self.value["category"],
+            value: Cow::Borrowed(&self.value["category"]),
         }
+    }
+
+    /// May be used to represent additional information that is not part of the basic
+    /// definition of the element. To make the use of extensions safe and manageable,
+    /// there is a strict set of governance  applied to the definition and use of
+    /// extensions. Though any implementer can define an extension, there is a set of
+    /// requirements that SHALL be met as part of the definition of the extension.
+    pub fn extension(&self) -> Option<Vec<Extension>> {
+        if let Some(Value::Array(val)) = self.value.get("extension") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
     }
 
     /// May be used to represent additional information that is not part of the basic
@@ -42,7 +101,9 @@ impl ExplanationOfBenefit_Adjudication<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -53,15 +114,9 @@ impl ExplanationOfBenefit_Adjudication<'_> {
     /// variance from expected amount.
     pub fn reason(&self) -> Option<CodeableConcept> {
         if let Some(val) = self.value.get("reason") {
-            return Some(CodeableConcept { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for value
-    pub fn _value(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_value") {
-            return Some(Element { value: val });
+            return Some(CodeableConcept {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -75,62 +130,115 @@ impl ExplanationOfBenefit_Adjudication<'_> {
         return None;
     }
 
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
-        }
-        return None;
-    }
-
-    /// May be used to represent additional information that is not part of the basic
-    /// definition of the element. To make the use of extensions safe and manageable,
-    /// there is a strict set of governance  applied to the definition and use of
-    /// extensions. Though any implementer can define an extension, there is a set of
-    /// requirements that SHALL be met as part of the definition of the extension.
-    pub fn extension(&self) -> Option<Vec<Extension>> {
-        if let Some(Value::Array(val)) = self.value.get("extension") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Extension { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// Monetary amount associated with the category.
-    pub fn amount(&self) -> Option<Money> {
-        if let Some(val) = self.value.get("amount") {
-            return Some(Money { value: val });
-        }
-        return None;
-    }
-
     pub fn validate(&self) -> bool {
-        let _ = self.category().validate();
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.reason() {
-            _val.validate();
-        }
         if let Some(_val) = self._value() {
-            _val.validate();
-        }
-        if let Some(_val) = self.value() {}
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self.amount() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
+        if !self.category().validate() {
+            return false;
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.reason() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.value() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct ExplanationOfBenefit_AdjudicationBuilder {
+    pub(crate) value: Value,
+}
+
+impl ExplanationOfBenefit_AdjudicationBuilder {
+    pub fn build(&self) -> ExplanationOfBenefit_Adjudication {
+        ExplanationOfBenefit_Adjudication {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(
+        existing: ExplanationOfBenefit_Adjudication,
+    ) -> ExplanationOfBenefit_AdjudicationBuilder {
+        ExplanationOfBenefit_AdjudicationBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(category: CodeableConcept) -> ExplanationOfBenefit_AdjudicationBuilder {
+        let mut __value: Value = json!({});
+        __value["category"] = json!(category.value);
+        return ExplanationOfBenefit_AdjudicationBuilder { value: __value };
+    }
+
+    pub fn _value<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut ExplanationOfBenefit_AdjudicationBuilder {
+        self.value["_value"] = json!(val.value);
+        return self;
+    }
+
+    pub fn amount<'a>(
+        &'a mut self,
+        val: Money,
+    ) -> &'a mut ExplanationOfBenefit_AdjudicationBuilder {
+        self.value["amount"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ExplanationOfBenefit_AdjudicationBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut ExplanationOfBenefit_AdjudicationBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut ExplanationOfBenefit_AdjudicationBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn reason<'a>(
+        &'a mut self,
+        val: CodeableConcept,
+    ) -> &'a mut ExplanationOfBenefit_AdjudicationBuilder {
+        self.value["reason"] = json!(val.value);
+        return self;
+    }
+
+    pub fn value<'a>(&'a mut self, val: f64) -> &'a mut ExplanationOfBenefit_AdjudicationBuilder {
+        self.value["value"] = json!(val);
+        return self;
     }
 }

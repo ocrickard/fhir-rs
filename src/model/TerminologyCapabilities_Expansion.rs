@@ -3,7 +3,9 @@
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::TerminologyCapabilities_Parameter::TerminologyCapabilities_Parameter;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A TerminologyCapabilities resource documents a set of capabilities (behaviors)
 /// of a FHIR Terminology Server that may be used as a statement of actual server
@@ -11,14 +13,26 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct TerminologyCapabilities_Expansion<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl TerminologyCapabilities_Expansion<'_> {
-    /// Whether the server can return nested value sets.
-    pub fn hierarchical(&self) -> Option<bool> {
-        if let Some(val) = self.value.get("hierarchical") {
-            return Some(val.as_bool().unwrap());
+    pub fn new(value: &Value) -> TerminologyCapabilities_Expansion {
+        TerminologyCapabilities_Expansion {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for hierarchical
+    pub fn _hierarchical(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_hierarchical") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -26,15 +40,29 @@ impl TerminologyCapabilities_Expansion<'_> {
     /// Extensions for incomplete
     pub fn _incomplete(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_incomplete") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
-    /// Whether the server supports paging on expansion.
-    pub fn paging(&self) -> Option<bool> {
-        if let Some(val) = self.value.get("paging") {
-            return Some(val.as_bool().unwrap());
+    /// Extensions for paging
+    pub fn _paging(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_paging") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Extensions for textFilter
+    pub fn _text_filter(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_textFilter") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -48,9 +76,36 @@ impl TerminologyCapabilities_Expansion<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Whether the server can return nested value sets.
+    pub fn hierarchical(&self) -> Option<bool> {
+        if let Some(val) = self.value.get("hierarchical") {
+            return Some(val.as_bool().unwrap());
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
+        }
+        return None;
+    }
+
+    /// Allow request for incomplete expansions?
+    pub fn incomplete(&self) -> Option<bool> {
+        if let Some(val) = self.value.get("incomplete") {
+            return Some(val.as_bool().unwrap());
         }
         return None;
     }
@@ -70,9 +125,19 @@ impl TerminologyCapabilities_Expansion<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Whether the server supports paging on expansion.
+    pub fn paging(&self) -> Option<bool> {
+        if let Some(val) = self.value.get("paging") {
+            return Some(val.as_bool().unwrap());
         }
         return None;
     }
@@ -82,26 +147,11 @@ impl TerminologyCapabilities_Expansion<'_> {
         if let Some(Value::Array(val)) = self.value.get("parameter") {
             return Some(
                 val.into_iter()
-                    .map(|e| TerminologyCapabilities_Parameter { value: e })
+                    .map(|e| TerminologyCapabilities_Parameter {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
-        }
-        return None;
-    }
-
-    /// Extensions for hierarchical
-    pub fn _hierarchical(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_hierarchical") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
         }
         return None;
     }
@@ -114,63 +164,164 @@ impl TerminologyCapabilities_Expansion<'_> {
         return None;
     }
 
-    /// Allow request for incomplete expansions?
-    pub fn incomplete(&self) -> Option<bool> {
-        if let Some(val) = self.value.get("incomplete") {
-            return Some(val.as_bool().unwrap());
-        }
-        return None;
-    }
-
-    /// Extensions for paging
-    pub fn _paging(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_paging") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
-    /// Extensions for textFilter
-    pub fn _text_filter(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_textFilter") {
-            return Some(Element { value: val });
-        }
-        return None;
-    }
-
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.hierarchical() {}
-        if let Some(_val) = self._incomplete() {
-            _val.validate();
-        }
-        if let Some(_val) = self.paging() {}
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        if let Some(_val) = self.parameter() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
         if let Some(_val) = self._hierarchical() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
-        if let Some(_val) = self.id() {}
-        if let Some(_val) = self.text_filter() {}
-        if let Some(_val) = self.incomplete() {}
+        if let Some(_val) = self._incomplete() {
+            if !_val.validate() {
+                return false;
+            }
+        }
         if let Some(_val) = self._paging() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         if let Some(_val) = self._text_filter() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.hierarchical() {}
+        if let Some(_val) = self.id() {}
+        if let Some(_val) = self.incomplete() {}
+        if let Some(_val) = self.modifier_extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.paging() {}
+        if let Some(_val) = self.parameter() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
+        if let Some(_val) = self.text_filter() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct TerminologyCapabilities_ExpansionBuilder {
+    pub(crate) value: Value,
+}
+
+impl TerminologyCapabilities_ExpansionBuilder {
+    pub fn build(&self) -> TerminologyCapabilities_Expansion {
+        TerminologyCapabilities_Expansion {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(
+        existing: TerminologyCapabilities_Expansion,
+    ) -> TerminologyCapabilities_ExpansionBuilder {
+        TerminologyCapabilities_ExpansionBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> TerminologyCapabilities_ExpansionBuilder {
+        let mut __value: Value = json!({});
+        return TerminologyCapabilities_ExpansionBuilder { value: __value };
+    }
+
+    pub fn _hierarchical<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["_hierarchical"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _incomplete<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["_incomplete"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _paging<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["_paging"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _text_filter<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["_textFilter"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn hierarchical<'a>(
+        &'a mut self,
+        val: bool,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["hierarchical"] = json!(val);
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn incomplete<'a>(
+        &'a mut self,
+        val: bool,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["incomplete"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn paging<'a>(&'a mut self, val: bool) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["paging"] = json!(val);
+        return self;
+    }
+
+    pub fn parameter<'a>(
+        &'a mut self,
+        val: Vec<TerminologyCapabilities_Parameter>,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["parameter"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn text_filter<'a>(
+        &'a mut self,
+        val: &str,
+    ) -> &'a mut TerminologyCapabilities_ExpansionBuilder {
+        self.value["textFilter"] = json!(val);
+        return self;
     }
 }

@@ -3,7 +3,9 @@
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::Period::Period;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A material substance originating from a biological entity intended to be
 /// transplanted or infused
@@ -11,14 +13,26 @@ use serde_json::value::Value;
 
 #[derive(Debug)]
 pub struct BiologicallyDerivedProduct_Manipulation<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl BiologicallyDerivedProduct_Manipulation<'_> {
-    /// Time of manipulation.
-    pub fn time_date_time(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("timeDateTime") {
-            return Some(string);
+    pub fn new(value: &Value) -> BiologicallyDerivedProduct_Manipulation {
+        BiologicallyDerivedProduct_Manipulation {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for description
+    pub fn _description(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_description") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
@@ -26,7 +40,17 @@ impl BiologicallyDerivedProduct_Manipulation<'_> {
     /// Extensions for timeDateTime
     pub fn _time_date_time(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_timeDateTime") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// Description of manipulation.
+    pub fn description(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("description") {
+            return Some(string);
         }
         return None;
     }
@@ -40,7 +64,9 @@ impl BiologicallyDerivedProduct_Manipulation<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -71,25 +97,19 @@ impl BiologicallyDerivedProduct_Manipulation<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
     }
 
-    /// Description of manipulation.
-    pub fn description(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("description") {
+    /// Time of manipulation.
+    pub fn time_date_time(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("timeDateTime") {
             return Some(string);
-        }
-        return None;
-    }
-
-    /// Extensions for description
-    pub fn _description(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_description") {
-            return Some(Element { value: val });
         }
         return None;
     }
@@ -97,34 +117,133 @@ impl BiologicallyDerivedProduct_Manipulation<'_> {
     /// Time of manipulation.
     pub fn time_period(&self) -> Option<Period> {
         if let Some(val) = self.value.get("timePeriod") {
-            return Some(Period { value: val });
+            return Some(Period {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.time_date_time() {}
-        if let Some(_val) = self._time_date_time() {
-            _val.validate();
+        if let Some(_val) = self._description() {
+            if !_val.validate() {
+                return false;
+            }
         }
+        if let Some(_val) = self._time_date_time() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.description() {}
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        if let Some(_val) = self.description() {}
-        if let Some(_val) = self._description() {
-            _val.validate();
-        }
+        if let Some(_val) = self.time_date_time() {}
         if let Some(_val) = self.time_period() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
         }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct BiologicallyDerivedProduct_ManipulationBuilder {
+    pub(crate) value: Value,
+}
+
+impl BiologicallyDerivedProduct_ManipulationBuilder {
+    pub fn build(&self) -> BiologicallyDerivedProduct_Manipulation {
+        BiologicallyDerivedProduct_Manipulation {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(
+        existing: BiologicallyDerivedProduct_Manipulation,
+    ) -> BiologicallyDerivedProduct_ManipulationBuilder {
+        BiologicallyDerivedProduct_ManipulationBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new() -> BiologicallyDerivedProduct_ManipulationBuilder {
+        let mut __value: Value = json!({});
+        return BiologicallyDerivedProduct_ManipulationBuilder { value: __value };
+    }
+
+    pub fn _description<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut BiologicallyDerivedProduct_ManipulationBuilder {
+        self.value["_description"] = json!(val.value);
+        return self;
+    }
+
+    pub fn _time_date_time<'a>(
+        &'a mut self,
+        val: Element,
+    ) -> &'a mut BiologicallyDerivedProduct_ManipulationBuilder {
+        self.value["_timeDateTime"] = json!(val.value);
+        return self;
+    }
+
+    pub fn description<'a>(
+        &'a mut self,
+        val: &str,
+    ) -> &'a mut BiologicallyDerivedProduct_ManipulationBuilder {
+        self.value["description"] = json!(val);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut BiologicallyDerivedProduct_ManipulationBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(
+        &'a mut self,
+        val: &str,
+    ) -> &'a mut BiologicallyDerivedProduct_ManipulationBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut BiologicallyDerivedProduct_ManipulationBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn time_date_time<'a>(
+        &'a mut self,
+        val: &str,
+    ) -> &'a mut BiologicallyDerivedProduct_ManipulationBuilder {
+        self.value["timeDateTime"] = json!(val);
+        return self;
+    }
+
+    pub fn time_period<'a>(
+        &'a mut self,
+        val: Period,
+    ) -> &'a mut BiologicallyDerivedProduct_ManipulationBuilder {
+        self.value["timePeriod"] = json!(val.value);
+        return self;
     }
 }

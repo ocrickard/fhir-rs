@@ -2,17 +2,57 @@
 
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A formal computable definition of an operation (on the RESTful interface) or a
 /// named query (using the search interaction).
 
 #[derive(Debug)]
 pub struct OperationDefinition_Binding<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl OperationDefinition_Binding<'_> {
+    pub fn new(value: &Value) -> OperationDefinition_Binding {
+        OperationDefinition_Binding {
+            value: Cow::Borrowed(value),
+        }
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
+    }
+
+    /// Extensions for strength
+    pub fn _strength(&self) -> Option<Element> {
+        if let Some(val) = self.value.get("_strength") {
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
+        }
+        return None;
+    }
+
+    /// May be used to represent additional information that is not part of the basic
+    /// definition of the element. To make the use of extensions safe and manageable,
+    /// there is a strict set of governance  applied to the definition and use of
+    /// extensions. Though any implementer can define an extension, there is a set of
+    /// requirements that SHALL be met as part of the definition of the extension.
+    pub fn extension(&self) -> Option<Vec<Extension>> {
+        if let Some(Value::Array(val)) = self.value.get("extension") {
+            return Some(
+                val.into_iter()
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+        return None;
+    }
+
     /// Unique id for the element within a resource (for internal references). This may
     /// be any string value that does not contain spaces.
     pub fn id(&self) -> Option<&str> {
@@ -37,29 +77,9 @@ impl OperationDefinition_Binding<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
-                    .collect::<Vec<_>>(),
-            );
-        }
-        return None;
-    }
-
-    /// Points to the value set or external definition (e.g. implicit value set) that
-    /// identifies the set of codes to be used.
-    pub fn value_set(&self) -> &str {
-        self.value.get("valueSet").unwrap().as_str().unwrap()
-    }
-
-    /// May be used to represent additional information that is not part of the basic
-    /// definition of the element. To make the use of extensions safe and manageable,
-    /// there is a strict set of governance  applied to the definition and use of
-    /// extensions. Though any implementer can define an extension, there is a set of
-    /// requirements that SHALL be met as part of the definition of the extension.
-    pub fn extension(&self) -> Option<Vec<Extension>> {
-        if let Some(Value::Array(val)) = self.value.get("extension") {
-            return Some(
-                val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
@@ -76,32 +96,91 @@ impl OperationDefinition_Binding<'_> {
         return None;
     }
 
-    /// Extensions for strength
-    pub fn _strength(&self) -> Option<Element> {
-        if let Some(val) = self.value.get("_strength") {
-            return Some(Element { value: val });
-        }
-        return None;
+    /// Points to the value set or external definition (e.g. implicit value set) that
+    /// identifies the set of codes to be used.
+    pub fn value_set(&self) -> &str {
+        self.value.get("valueSet").unwrap().as_str().unwrap()
     }
 
     pub fn validate(&self) -> bool {
+        if let Some(_val) = self._strength() {
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if let Some(_val) = self.extension() {
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
+        }
         if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
-        }
-        let _ = self.value_set();
-        if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
         if let Some(_val) = self.strength() {}
-        if let Some(_val) = self._strength() {
-            _val.validate();
-        }
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct OperationDefinition_BindingBuilder {
+    pub(crate) value: Value,
+}
+
+impl OperationDefinition_BindingBuilder {
+    pub fn build(&self) -> OperationDefinition_Binding {
+        OperationDefinition_Binding {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: OperationDefinition_Binding) -> OperationDefinition_BindingBuilder {
+        OperationDefinition_BindingBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(value_set: &str) -> OperationDefinition_BindingBuilder {
+        let mut __value: Value = json!({});
+        __value["valueSet"] = json!(value_set);
+        return OperationDefinition_BindingBuilder { value: __value };
+    }
+
+    pub fn _strength<'a>(&'a mut self, val: Element) -> &'a mut OperationDefinition_BindingBuilder {
+        self.value["_strength"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut OperationDefinition_BindingBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut OperationDefinition_BindingBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut OperationDefinition_BindingBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn strength<'a>(
+        &'a mut self,
+        val: OperationDefinition_BindingStrength,
+    ) -> &'a mut OperationDefinition_BindingBuilder {
+        self.value["strength"] = json!(val.to_string());
+        return self;
     }
 }
 
@@ -121,6 +200,15 @@ impl OperationDefinition_BindingStrength {
             "preferred" => Some(OperationDefinition_BindingStrength::Preferred),
             "example" => Some(OperationDefinition_BindingStrength::Example),
             _ => None,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            OperationDefinition_BindingStrength::Required => "required".to_string(),
+            OperationDefinition_BindingStrength::Extensible => "extensible".to_string(),
+            OperationDefinition_BindingStrength::Preferred => "preferred".to_string(),
+            OperationDefinition_BindingStrength::Example => "example".to_string(),
         }
     }
 }

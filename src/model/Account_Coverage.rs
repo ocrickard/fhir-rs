@@ -3,32 +3,47 @@
 use crate::model::Element::Element;
 use crate::model::Extension::Extension;
 use crate::model::Reference::Reference;
+use serde_json::json;
 use serde_json::value::Value;
+use std::borrow::Cow;
 
 /// A financial tool for tracking value accrued for a particular purpose.  In the
 /// healthcare field, used to track charges for a patient, cost centers, etc.
 
 #[derive(Debug)]
 pub struct Account_Coverage<'a> {
-    pub value: &'a Value,
+    pub(crate) value: Cow<'a, Value>,
 }
 
 impl Account_Coverage<'_> {
-    /// Unique id for the element within a resource (for internal references). This may
-    /// be any string value that does not contain spaces.
-    pub fn id(&self) -> Option<&str> {
-        if let Some(Value::String(string)) = self.value.get("id") {
-            return Some(string);
+    pub fn new(value: &Value) -> Account_Coverage {
+        Account_Coverage {
+            value: Cow::Borrowed(value),
         }
-        return None;
+    }
+
+    pub fn to_json(&self) -> Value {
+        (*self.value).clone()
     }
 
     /// Extensions for priority
     pub fn _priority(&self) -> Option<Element> {
         if let Some(val) = self.value.get("_priority") {
-            return Some(Element { value: val });
+            return Some(Element {
+                value: Cow::Borrowed(val),
+            });
         }
         return None;
+    }
+
+    /// The party(s) that contribute to payment (or part of) of the charges applied to
+    /// this account (including self-pay).    A coverage may only be responsible for
+    /// specific types of charges, and the sequence of the coverages in the account
+    /// could be important when processing billing.
+    pub fn coverage(&self) -> Reference {
+        Reference {
+            value: Cow::Borrowed(&self.value["coverage"]),
+        }
     }
 
     /// May be used to represent additional information that is not part of the basic
@@ -40,9 +55,20 @@ impl Account_Coverage<'_> {
         if let Some(Value::Array(val)) = self.value.get("extension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
+        }
+        return None;
+    }
+
+    /// Unique id for the element within a resource (for internal references). This may
+    /// be any string value that does not contain spaces.
+    pub fn id(&self) -> Option<&str> {
+        if let Some(Value::String(string)) = self.value.get("id") {
+            return Some(string);
         }
         return None;
     }
@@ -62,21 +88,13 @@ impl Account_Coverage<'_> {
         if let Some(Value::Array(val)) = self.value.get("modifierExtension") {
             return Some(
                 val.into_iter()
-                    .map(|e| Extension { value: e })
+                    .map(|e| Extension {
+                        value: Cow::Borrowed(e),
+                    })
                     .collect::<Vec<_>>(),
             );
         }
         return None;
-    }
-
-    /// The party(s) that contribute to payment (or part of) of the charges applied to
-    /// this account (including self-pay).    A coverage may only be responsible for
-    /// specific types of charges, and the sequence of the coverages in the account
-    /// could be important when processing billing.
-    pub fn coverage(&self) -> Reference {
-        Reference {
-            value: &self.value["coverage"],
-        }
     }
 
     /// The priority of the coverage in the context of this account.
@@ -88,22 +106,80 @@ impl Account_Coverage<'_> {
     }
 
     pub fn validate(&self) -> bool {
-        if let Some(_val) = self.id() {}
         if let Some(_val) = self._priority() {
-            _val.validate();
+            if !_val.validate() {
+                return false;
+            }
+        }
+        if !self.coverage().validate() {
+            return false;
         }
         if let Some(_val) = self.extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
+        if let Some(_val) = self.id() {}
         if let Some(_val) = self.modifier_extension() {
-            _val.into_iter().for_each(|e| {
-                e.validate();
-            });
+            if !_val.into_iter().map(|e| e.validate()).all(|x| x == true) {
+                return false;
+            }
         }
-        let _ = self.coverage().validate();
         if let Some(_val) = self.priority() {}
         return true;
+    }
+}
+
+#[derive(Debug)]
+pub struct Account_CoverageBuilder {
+    pub(crate) value: Value,
+}
+
+impl Account_CoverageBuilder {
+    pub fn build(&self) -> Account_Coverage {
+        Account_Coverage {
+            value: Cow::Owned(self.value.clone()),
+        }
+    }
+
+    pub fn with(existing: Account_Coverage) -> Account_CoverageBuilder {
+        Account_CoverageBuilder {
+            value: (*existing.value).clone(),
+        }
+    }
+
+    pub fn new(coverage: Reference) -> Account_CoverageBuilder {
+        let mut __value: Value = json!({});
+        __value["coverage"] = json!(coverage.value);
+        return Account_CoverageBuilder { value: __value };
+    }
+
+    pub fn _priority<'a>(&'a mut self, val: Element) -> &'a mut Account_CoverageBuilder {
+        self.value["_priority"] = json!(val.value);
+        return self;
+    }
+
+    pub fn extension<'a>(&'a mut self, val: Vec<Extension>) -> &'a mut Account_CoverageBuilder {
+        self.value["extension"] = json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn id<'a>(&'a mut self, val: &str) -> &'a mut Account_CoverageBuilder {
+        self.value["id"] = json!(val);
+        return self;
+    }
+
+    pub fn modifier_extension<'a>(
+        &'a mut self,
+        val: Vec<Extension>,
+    ) -> &'a mut Account_CoverageBuilder {
+        self.value["modifierExtension"] =
+            json!(val.into_iter().map(|e| e.value).collect::<Vec<_>>());
+        return self;
+    }
+
+    pub fn priority<'a>(&'a mut self, val: i64) -> &'a mut Account_CoverageBuilder {
+        self.value["priority"] = json!(val);
+        return self;
     }
 }
