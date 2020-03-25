@@ -8,13 +8,13 @@
   display: inline-block;
   padding: 10px 20px;
   margin: 2px;
-  border: 1px solid $theodolite-dark !important;
+  border: 1px solid $fhir-rs-dark !important;
   border-radius: 3px;
   text-decoration: none !important;
-  color: $theodolite-dark !important;
+  color: $fhir-rs-dark !important;
   font-weight: 900;
   &:hover {
-    background: $theodolite-dark !important;
+    background: $fhir-rs-dark !important;
     color: #fff !important;
   }
 }
@@ -29,12 +29,12 @@
 
 .toggler strong {
   font-size: 24px;
-  color: $theodolite-dark;
+  color: $fhir-rs-dark;
 }
 
 .display-configuration-cocoapods .toggler .button-cocoapods,
 .display-configuration-carthage .toggler .button-carthage {
-  background: darken($theodolite-dark, 10%) !important;
+  background: darken($fhir-rs-dark, 10%) !important;
   color: #fff !important;
 }
 block {

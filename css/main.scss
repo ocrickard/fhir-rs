@@ -43,9 +43,9 @@
   font-style: normal;
 }
 
-$theodolite-vibrant: #F0C833;
-$theodolite-light: #F6F7F9;
-$theodolite-dark: #5F6673;
+$fhir-rs-vibrant: #F0C833;
+$fhir-rs-light: #F6F7F9;
+$fhir-rs-dark: #5F6673;
 
 // Our variables
 $base-font-family:  proxima-nova,"Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;
@@ -66,8 +66,8 @@ $gridBlockWrapper-alternate-background: #e9e9e9;
 
 // Code block colors
 $code-background: #ededed;
-$code-gutter-color: $theodolite-dark;
-$code-text-general: $theodolite-dark;
+$code-gutter-color: $fhir-rs-dark;
+$code-text-general: $fhir-rs-dark;
 
 
 // $primary-bg overlays

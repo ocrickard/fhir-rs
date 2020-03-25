@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: $theodolite-light;
+  background-color: $fhir-rs-light;
 
   .nav {
     display: flex;
@@ -13,7 +13,7 @@
     justify-content: flex-end;
     height: $header-height;
     width: 100%;
-    background-color: $theodolite-vibrant;
+    background-color: $fhir-rs-vibrant;
 
     @media screen and (max-width: 750px) {
       justify-content: space-around;
@@ -23,7 +23,7 @@
       margin-right: 20px;
       padding: 3px 12px 3px 12px;
       border-radius: 3px;
-      color: $theodolite-light;
+      color: $fhir-rs-light;
       font-weight: 500;
 
       @media screen and (max-width: 750px) {
@@ -53,18 +53,18 @@
     }
 
     &.light {
-      background-color: $theodolite-light;
+      background-color: $fhir-rs-light;
       color: $text;
     }
 
     &.dark {
-      background-color: $theodolite-dark;
-      color: $theodolite-light;
+      background-color: $fhir-rs-dark;
+      color: $fhir-rs-light;
     }
 
     &.hero {
-      background-color: $theodolite-vibrant;
-      color: $theodolite-light;
+      background-color: $fhir-rs-vibrant;
+      color: $fhir-rs-light;
       height: 400px;
       padding-bottom: 30px;
 
@@ -125,8 +125,8 @@
               margin-right: 20px;
               padding: 8px 15px 8px 15px;
               border-radius: 5px;
-              color: $theodolite-light;
-              border-color: $theodolite-light;
+              color: $fhir-rs-light;
+              border-color: $fhir-rs-light;
               border-width: 2px;
               border-style: solid;
               font-size: 12px;
@@ -137,8 +137,8 @@
               }
 
               &:hover {
-                background-color: $theodolite-light;
-                color: $theodolite-vibrant;
+                background-color: $fhir-rs-light;
+                color: $fhir-rs-vibrant;
               }
             }
           }
@@ -204,7 +204,7 @@
         }
 
         a {
-          color: $theodolite-vibrant;
+          color: $fhir-rs-vibrant;
 
           &:hover {
             text-decoration: underline;
@@ -221,8 +221,8 @@
     flex-wrap: wrap;
     align-items: center;
     width: 100%;
-    background-color: $theodolite-dark;
-    color: $theodolite-light;
+    background-color: $fhir-rs-dark;
+    color: $fhir-rs-light;
     padding-left: 40px;
     padding-right: 40px;
     padding-top: 10px;
@@ -249,7 +249,7 @@
     a {
       margin-left: 20px;
       font-weight: 300;
-      color: $theodolite-light;
+      color: $fhir-rs-light;
 
       &:hover {
         text-decoration: underline;
