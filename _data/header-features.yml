@@ -1,0 +1,7 @@
+# Add features here if you are wanting a bulleted list of features in the header of the
+# landing page.
+
+- feature: Memory safe.
+- feature: High performance.
+- feature: Minimal data copying.
+- feature: Efficient memory usage.

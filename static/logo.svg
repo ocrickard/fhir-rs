@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512px" height="512px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <title>Theodolite-logo</title>
+    <description>Created with Sketch (http://www.bohemiancoding.com/sketch)</description>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <circle id="Oval-2" fill="#F0C833" sketch:type="MSShapeGroup" cx="256" cy="256" r="256"></circle>
+        <polygon id="Triangle-1" stroke="#FFFFFF" stroke-width="35" stroke-linecap="round" stroke-linejoin="bevel" sketch:type="MSShapeGroup" points="256 98 412 359 100 359 "></polygon>
+        <circle id="Oval-1" fill="#FFFFFF" sketch:type="MSShapeGroup" cx="256" cy="256" r="27"></circle>
+    </g>
+</svg>
