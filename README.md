@@ -50,7 +50,7 @@ As a result, a sparse structure was necessary to avoid excessive memory allocati
 
 I built fhir_rs so that I could prototype a healthcare server. The challenges I had in building out the FHIR spec as Rust data types made me want to share my work with others. Maybe it'll be useful, maybe not...
 
-### What features still need to be implemented?<a name="to-be-implemented" \>
+### What features still need to be implemented?
 
 If you'd like to help out, please take one of these and turn it into a Pull Request! All help is welcome.
 
