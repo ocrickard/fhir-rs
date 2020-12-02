@@ -316,8 +316,12 @@ impl ResourceList<'_> {
     }
 
     pub fn resource(&self) -> Option<ResourceListEnum> {
-        let fhir_type = self.value["resourceType"].as_str().unwrap();
-        match fhir_type {
+        let fhir_type = self.value.get("resourceType")?;
+        if !fhir_type.is_string() {
+            return None
+        }
+
+        match fhir_type.as_str().expect("resourceType must be a string") {
             "Account" => Some(ResourceListEnum::ResourceAccount(Account {
                 value: self.value.clone(),
             })),
