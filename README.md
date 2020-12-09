@@ -7,7 +7,7 @@ Here's how parsing works:
 ```rust
 use fhir_rs::{fhir_parse, model};
 
-if let Some(resource_list) = fhir_parse(&json_string) {
+if let Ok(resource_list) = fhir_json_parse(&json_string) {
   match resource_list.resource() {
     model::ResourceList::ResourceListEnum::ResourcePatient(patient) => {
       println!("Patient: {:?}", patient);
