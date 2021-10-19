@@ -1,5 +1,11 @@
 # FHIR for Rust!
 
+# This project has moved
+
+The fhirproject organization is now maintaining this library: https://github.com/fhirproject/fhir-rs.
+
+## Deprecated Readme
+
 A simple, fast, and safe interface for FHIR (Fast Healthcare Interoperability Resources) JSON data in Rust.
 
 Here's how parsing works:
